@@ -1,22 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { syncCampaignPerformance } from '@/lib/meta';
+import dbConnect from '@/lib/db';
+import Campaign from '@/lib/models/Campaign';
 
 export async function GET(req: NextRequest) {
   try {
-    // Security check: verify auth (can use verifyAuth from auth.ts)
-    // For now, we'll assume the user is authorized via the session token
     const token = req.headers.get('Authorization');
     if (!token) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
+    await dbConnect();
+
     console.log('--- Meta Campaign Sync Started ---');
-    const data = await syncCampaignPerformance();
-    console.log('Sync Result:', JSON.stringify(data, null, 2));
+    const response = await syncCampaignPerformance();
+    const campaignsData = response.data || [];
+
+    console.log(`Found ${campaignsData.length} campaigns to sync`);
+
+    const syncResults = await Promise.all(
+      campaignsData.map(async (item: any) => {
+        return Campaign.findOneAndUpdate(
+          { name: item.campaign_name, platform: 'Meta' },
+          {
+            spend: parseFloat(item.spend || '0'),
+            impressions: parseInt(item.impressions || '0', 10),
+            clicks: parseInt(item.clicks || '0', 10),
+            conversions: parseInt(item.conversions || '0', 10),
+          },
+          { upsert: true, new: true }
+        );
+      })
+    );
 
     return NextResponse.json({
       message: 'Campaign performance synced successfully',
-      data: data
+      count: syncResults.length,
+      data: syncResults
     }, { status: 200 });
 
   } catch (err: any) {

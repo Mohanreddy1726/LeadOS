@@ -1,19 +1,45 @@
 "use client";
 
+import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Panel, PanelHead, KpiCard } from "@/components/bits";
 import { useStore } from "@/lib/store";
-import { Megaphone, TrendingUp, DollarSign, Users } from "lucide-react";
+import { Megaphone, TrendingUp, DollarSign, Users, RefreshCw } from "lucide-react";
 
 const inr = (val: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
 
 export default function CampaignsPage() {
-  const { campaigns, leads } = useStore();
+  const { campaigns, leads, setCampaigns } = useStore();
+  const [syncing, setSyncing] = useState(false);
   const totalSpend = campaigns.reduce((s, c) => s + (c.spend || 0), 0);
   const totalLeads = leads.length;
   const totalConverted = leads.filter(l => l.stage === "Converted").length;
   const avgCpl = totalLeads > 0 ? totalSpend / totalLeads : 0;
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const token = localStorage.getItem("leados.token");
+      const res = await fetch("/api/meta/sync", {
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data) {
+          setCampaigns(data.data);
+        }
+        alert("Campaigns synced successfully!");
+      } else {
+        alert("Failed to sync campaigns.");
+      }
+    } catch (err) {
+      console.error("Sync error:", err);
+      alert("An error occurred while syncing campaigns.");
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   return (
     <AppShell
@@ -54,9 +80,19 @@ export default function CampaignsPage() {
             title="Channel Breakdown"
             hint="Granular performance metrics by campaign and platform"
             action={
-              <button className="h-8 rounded-xl bg-primary px-3 text-[12px] font-medium text-primary-foreground">
-                New Campaign
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSync}
+                  disabled={syncing}
+                  className="flex items-center gap-2 h-8 rounded-xl bg-secondary px-3 text-[12px] font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} />
+                  {syncing ? "Syncing..." : "Sync Meta"}
+                </button>
+                <button className="h-8 rounded-xl bg-primary px-3 text-[12px] font-medium text-primary-foreground">
+                  New Campaign
+                </button>
+              </div>
             }
           />
           <div className="overflow-x-auto">

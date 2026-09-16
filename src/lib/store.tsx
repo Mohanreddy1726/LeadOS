@@ -80,6 +80,7 @@ interface Store {
   team: any[];
   fetchTeam: () => Promise<void>;
   campaigns: any[];
+  setCampaigns: (c: any[]) => void;
   aiCalls: any[];
   applications: any[];
   activity: any[];
@@ -323,6 +324,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const setCampaigns = useCallback(async (data: any[]) => {
+    setCampaigns(data);
+  }, []);
+
   const value = useMemo<Store>(
     () => ({
       user,
@@ -342,6 +347,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       team,
       fetchTeam,
       campaigns,
+      setCampaigns,
       aiCalls,
       applications,
       activity,
@@ -366,6 +372,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       team,
       fetchTeam,
       campaigns,
+      setCampaigns,
       aiCalls,
       applications,
       activity,

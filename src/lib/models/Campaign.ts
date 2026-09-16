@@ -4,6 +4,9 @@ export interface ICampaign extends Document {
   name: string;
   platform: string;
   spend: number;
+  impressions: number;
+  clicks: number;
+  conversions: number;
   budget?: number;
   createdAt: Date;
 }
@@ -12,6 +15,9 @@ const CampaignSchema = new Schema<ICampaign>({
   name: { type: String, required: true },
   platform: { type: String, required: true },
   spend: { type: Number, default: 0 },
+  impressions: { type: Number, default: 0 },
+  clicks: { type: Number, default: 0 },
+  conversions: { type: Number, default: 0 },
   budget: { type: Number },
   createdAt: { type: Date, default: Date.now },
 });
