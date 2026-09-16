@@ -4,30 +4,38 @@ import Lead from '@/lib/models/Lead';
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('--- Ingestion Request Received ---');
     await dbConnect();
 
     // Security check: Verify the ingestion token
     const token = req.headers.get('x-ingest-token');
+    console.log('Auth Token:', token ? 'Present' : 'Missing');
+
     if (!token || token !== process.env.INGEST_TOKEN) {
+      console.log('Auth Result: Unauthorized');
       return NextResponse.json({ message: 'Unauthorized: Invalid or missing ingest token' }, { status: 401 });
     }
 
     const body = await req.json();
+    console.log('Received Body:', JSON.stringify(body, null, 2));
+
     const { formId, data } = body;
 
     if (!formId || !data) {
+      console.log('Validation Result: Missing formId or data');
       return NextResponse.json({ message: 'Missing formId or data' }, { status: 400 });
     }
 
     // Standardize data based on your requirements
-    // We want: Name, Phone Number, MBBS/MASTERS, Preferred country, Form Source
-
     const name = data.name || data.fullName || data['Full Name'] || data['Full Name'] || '';
     const phone = data.phone || data.phoneNumber || data['Phone Number'] || data['Mobile Number'] || '';
     const program = data.programType || data.courseType || data.selection || data.program || 'Not Specified';
     const destination = data.preferredCountry || data.country || data['Preferred country'] || data['Country'] || 'Not Specified';
 
+    console.log('Mapped Data:', { name, phone, program, destination });
+
     if (!name || !phone) {
+      console.log('Validation Result: Missing name or phone');
       return NextResponse.json({ message: 'Name and Phone are required' }, { status: 400 });
     }
 
@@ -35,7 +43,7 @@ export async function POST(req: NextRequest) {
     const newLead = new Lead({
       name,
       phone,
-      email: data.email || '', // Optional, but good to have if available
+      email: data.email || '',
       program,
       destination,
       source: `Website: ${formId}`,
@@ -44,6 +52,7 @@ export async function POST(req: NextRequest) {
     });
 
     await newLead.save();
+    console.log('Database Result: Lead saved successfully', newLead._id);
 
     return NextResponse.json({
       message: 'Lead ingested successfully',
@@ -51,7 +60,7 @@ export async function POST(req: NextRequest) {
     }, { status: 201 });
 
   } catch (err: any) {
-    console.error('Ingestion error:', err);
+    console.error('Ingestion system crash:', err);
     return NextResponse.json({ message: 'Server error', error: err.message }, { status: 500 });
   }
 }
