@@ -11,8 +11,11 @@ export async function GET(req: NextRequest) {
   console.log('Meta Webhook Verification:', { mode, token, challenge });
 
   // The verify_token should be set in .env.local as META_WEBHOOK_VERIFY_TOKEN
-  if (mode === 'subscribe' && token === process.env.META_WEBHOOK_VERIFY_TOKEN) {
-    return new NextResponse(challenge, { status: 200 });
+  if (mode === 'subscribe' && token === process.env.META_WEBHOOK_VERIFY_TOKEN && challenge) {
+    return new NextResponse(challenge, {
+      status: 200,
+      headers: { 'Content-Type': 'text/plain' }
+    });
   }
 
   return NextResponse.json({ message: 'Verification failed' }, { status: 403 });
@@ -34,7 +37,6 @@ export async function POST(req: NextRequest) {
 
       // Fetch actual lead data from Meta Graph API
       try {
-        const { fetchMetaLeadData, processMetaLead } = await import('@/lib/meta');
         const leadData = await fetchMetaLeadData(change.leadgen_id);
         await processMetaLead(leadData);
         console.log('Meta lead processed successfully:', change.leadgen_id);
