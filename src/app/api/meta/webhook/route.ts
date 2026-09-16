@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processMetaLead } from '@/lib/meta';
+import { processMetaLead, fetchMetaLeadData } from '@/lib/meta';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
