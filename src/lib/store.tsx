@@ -324,10 +324,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const setCampaigns = useCallback(async (data: any[]) => {
-    setCampaigns(data);
-  }, []);
-
   const value = useMemo<Store>(
     () => ({
       user,
