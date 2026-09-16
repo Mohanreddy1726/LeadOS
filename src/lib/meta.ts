@@ -1,4 +1,4 @@
-import { Lead } from './models/Lead';
+import Lead from './models/Lead';
 import dbConnect from './db';
 
 interface MetaConfig {
