@@ -41,7 +41,7 @@ export default function ActivityPage() {
             <div className="absolute left-8 top-0 bottom-0 w-px bg-border" />
             <ul className="space-y-6">
               {activity.map((item) => {
-                const config = KIND_CONFIG[item.kind];
+                const config = KIND_CONFIG[item.kind as keyof typeof KIND_CONFIG];
                 const Icon = config.icon;
                 return (
                   <li key={item.id} className="relative flex gap-4">

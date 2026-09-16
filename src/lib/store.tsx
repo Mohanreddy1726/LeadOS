@@ -11,8 +11,6 @@ import {
 } from "react";
 import {
   type FollowUp,
-  type Lead,
-  type Role,
   type Stage,
 } from "./mock";
 
@@ -69,7 +67,7 @@ interface Store {
   hydrated: boolean;
   signIn: (u: SessionUser, token: string) => void;
   signOut: () => void;
-  switchRole: (r: Role) => void;
+  switchRole: (r: Role, memberId?: string) => void;
   leads: Lead[];
   assignLeads: (ids: string[], callerId: string) => void;
   setStage: (id: string, stage: Stage) => void;

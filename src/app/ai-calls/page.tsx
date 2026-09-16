@@ -85,7 +85,7 @@ export default function AiCallsPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {aiCalls.map((c) => {
-                    const lead = leads.find((l) => l.memberId === c.leadId || l.id === c.leadId);
+                    const lead = leads.find((l) => l.id === c.leadId);
                     return (
                       <tr
                         key={c.id}

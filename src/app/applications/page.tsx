@@ -71,7 +71,7 @@ export default function ApplicationsPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {applications.map((a) => {
-                    const lead = leads.find(l => l.memberId === a.leadId || l.id === a.leadId);
+                    const lead = leads.find(l => l.id === a.leadId);
                     return (
                       <tr
                         key={a.id || a._id}

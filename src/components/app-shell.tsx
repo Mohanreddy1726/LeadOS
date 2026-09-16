@@ -26,7 +26,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useStore } from "@/lib/store";
+import { useStore, type Role } from "@/lib/store";
 import { Avatar } from "@/components/bits";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QualityBadge, ScoreBadge, StatusBadge, Avatar } from "@/components/bits";
 import { FollowUpModal } from "@/components/follow-up-modal";
-import { useStore } from "@/lib/store";
+import { useStore, type Lead } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const STAGES = [
@@ -83,7 +83,7 @@ export function LeadDetail({ lead }: { lead: any }) {
       <div className="flex items-start gap-3 border-b border-border px-4 pt-5 pb-4">
         <Avatar
           name={lead.name}
-          initials={lead.name.split(" ").map((p) => p[0]).join("").slice(0, 2)}
+          initials={lead.name.split(" ").map((p: string) => p[0]).join("").slice(0, 2)}
           tone={lead.quality === "junk" ? "junk" : lead.quality === "hot" ? "hot" : "med"}
           className="size-10 rounded-xl text-[13px]"
         />
@@ -97,7 +97,7 @@ export function LeadDetail({ lead }: { lead: any }) {
             {lead.id} · {lead.phone} · {lead.email}
           </p>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            {lead.source} · {campaignById(lead.campaignId).name}
+            {lead.source} · {campaigns.find(c => c.id === lead.campaignId)?.name ?? "Unknown"}
           </p>
         </div>
       </div>

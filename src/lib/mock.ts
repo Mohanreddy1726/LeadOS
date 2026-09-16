@@ -350,7 +350,7 @@ export const leads: Lead[] = Array.from({ length: 64 }, (_, i) => {
         ? "Call reached an unrelated person and no education intent was expressed. Number flagged as junk."
         : `Budget range matches ${program} programmes in ${destination}, intake is confirmed for ${r() > 0.4 ? "2026" : "2027"}, and the student asked about next steps — all strong buying signals.`,
     documents: pick(r, ["Ready", "Partially Ready", "Not Started"]),
-    timeline: pick(r, ["Immediate", "1–3 months", "3–6 months", "Undecided"]) as const,
+    timeline: pick(r, ["Immediate", "1–3 months", "3–6 months", "Undecided"]),
   } satisfies Lead;
 });
 

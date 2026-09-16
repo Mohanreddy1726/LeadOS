@@ -85,11 +85,11 @@ export function AssignPanel({ leads }: { leads: any[] }) {
                   className="size-3.5 accent-[var(--primary)]"
                   aria-label={`Select ${l.name}`}
                 />
-                <Avatar
-                  name={l.name}
-                  initials={l.name.split(" ").map((p) => p[0]).join("").slice(0, 2)}
-                  tone={l.quality === "hot" ? "hot" : "med"}
-                />
+                  <Avatar
+                    name={l.name}
+                    initials={l.name.split(" ").map((p: string) => p[0]).join("").slice(0, 2)}
+                    tone={l.quality === "hot" ? "hot" : "med"}
+                  />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[12px] font-medium">{l.name}</span>
                   <span className="font-mono block truncate text-[10px] text-faint">

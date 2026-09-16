@@ -30,12 +30,12 @@ export default function AnalyticsPage() {
   }, []);
 
   const funnel = [
-    { stage: "New", value: leads.filter(l => l.stage === "New").length },
-    { stage: "Contacted", value: leads.filter(l => l.stage === "Contacted").length },
-    { stage: "Interested", value: leads.filter(l => l.stage === "Interested").length },
-    { stage: "Qualified", value: leads.filter(l => l.stage === "Qualified").length },
-    { stage: "Applied", value: leads.filter(l => l.stage === "Applied").length },
-    { stage: "Converted", value: leads.filter(l => l.stage === "Converted").length },
+    { label: "New", value: leads.filter(l => l.stage === "New").length },
+    { label: "Contacted", value: leads.filter(l => l.stage === "Contacted").length },
+    { label: "Interested", value: leads.filter(l => l.stage === "Interested").length },
+    { label: "Qualified", value: leads.filter(l => l.stage === "Qualified").length },
+    { label: "Application", value: leads.filter(l => l.stage === "Application").length },
+    { label: "Converted", value: leads.filter(l => l.stage === "Converted").length },
   ];
 
   return (

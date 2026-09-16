@@ -28,7 +28,7 @@ import {
 } from "@/components/bits";
 import { LeadDrawer } from "@/components/lead-drawer";
 import { AssignPanel } from "@/components/assign-panel";
-import { useStore, useVisibleLeads, type Lead } from "@/lib/store";
+import { useStore, useVisibleLeads, type Lead, type Role } from "@/lib/store";
 import { toast } from "sonner";
 
 const STAGES = [
@@ -97,28 +97,29 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
     newLeads: leads.filter(l => l.stage === 'New').length,
     aiSuccess: leads.filter(l => l.quality !== 'junk').length,
     followUps: leads.filter(l => l.stage === 'Contacted').length,
-    applications: leads.filter(l => l.stage === 'Applied').length,
+    applications: leads.filter(l => l.stage === 'Application').length,
   };
 
   const qualitySplit = [
-    { label: 'Hot', value: leads.filter(l => l.quality === 'hot').length },
-    { label: 'Warm', value: leads.filter(l => l.quality === 'warm').length },
-    { label: 'Cold', value: leads.filter(l => l.quality === 'cold').length },
-    { label: 'Junk', value: leads.filter(l => l.quality === 'junk').length },
+    { label: 'Hot', value: leads.filter(l => l.quality === 'hot').length, color: 'var(--color-hot)' },
+    { label: 'High', value: leads.filter(l => l.quality === 'high').length, color: 'var(--color-high)' },
+    { label: 'Medium', value: leads.filter(l => l.quality === 'medium').length, color: 'var(--color-med)' },
+    { label: 'Low', value: leads.filter(l => l.quality === 'low').length, color: 'var(--color-low)' },
+    { label: 'Junk', value: leads.filter(l => l.quality === 'junk').length, color: 'var(--color-junk)' },
   ];
 
   const sourceSplit = [
-    { label: 'Meta', value: leads.filter(l => l.campaignId.includes('meta')).length },
-    { label: 'Google', value: leads.filter(l => l.campaignId.includes('google')).length },
-    { label: 'WhatsApp', value: leads.filter(l => l.campaignId.includes('wa')).length },
+    { label: 'Meta', value: leads.filter(l => l.campaignId.includes('meta')).length, color: 'var(--color-primary)' },
+    { label: 'Google', value: leads.filter(l => l.campaignId.includes('google')).length, color: 'var(--color-high)' },
+    { label: 'WhatsApp', value: leads.filter(l => l.campaignId.includes('wa')).length, color: 'var(--color-med)' },
   ];
 
   const funnel = [
-    { stage: 'Total', value: totals.leads },
-    { stage: 'Qualified', value: totals.qualified },
-    { stage: 'Interested', value: leads.filter(l => l.stage === 'Interested').length },
-    { stage: 'Applied', value: totals.applications },
-    { stage: 'Converted', value: totals.conversions },
+    { label: 'Total', value: totals.leads },
+    { label: 'Qualified', value: totals.qualified },
+    { label: 'Interested', value: leads.filter(l => l.stage === 'Interested').length },
+    { label: 'Application', value: totals.applications },
+    { label: 'Converted', value: totals.conversions },
   ];
 
   const callerPerf = team
@@ -295,10 +296,11 @@ function ManagerDash({ onOpen }: { onOpen: (l: Lead) => void }) {
   const hot = leads.filter((l) => l.quality === "hot");
 
   const qualitySplit = [
-    { label: 'Hot', value: leads.filter(l => l.quality === 'hot').length },
-    { label: 'Warm', value: leads.filter(l => l.quality === 'warm').length },
-    { label: 'Cold', value: leads.filter(l => l.quality === 'cold').length },
-    { label: 'Junk', value: leads.filter(l => l.quality === 'junk').length },
+    { label: 'Hot', value: leads.filter(l => l.quality === 'hot').length, color: 'var(--color-hot)' },
+    { label: 'High', value: leads.filter(l => l.quality === 'high').length, color: 'var(--color-high)' },
+    { label: 'Medium', value: leads.filter(l => l.quality === 'medium').length, color: 'var(--color-med)' },
+    { label: 'Low', value: leads.filter(l => l.quality === 'low').length, color: 'var(--color-low)' },
+    { label: 'Junk', value: leads.filter(l => l.quality === 'junk').length, color: 'var(--color-junk)' },
   ];
 
   const telecallers = team.filter(m => m.role === "telecaller");

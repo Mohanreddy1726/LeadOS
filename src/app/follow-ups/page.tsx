@@ -53,7 +53,7 @@ export default function FollowUpsPage() {
             ) : (
               <ul className="divide-y divide-border">
                 {items.map((f) => {
-                  const lead = leads.find(l => l.memberId === f.leadId || l.id === f.leadId);
+                  const lead = leads.find(l => l.id === f.leadId);
                   return (
                     <li
                       key={f.id}

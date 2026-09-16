@@ -5,10 +5,11 @@ import { verifyAuth } from '@/lib/auth';
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
+    const { id } = await params;
 
     const authResult = await verifyAuth(req);
     if ('error' in authResult) {
@@ -16,7 +17,7 @@ export async function PATCH(
     }
 
     const { stage } = await req.json();
-    const lead = await Lead.findByIdAndUpdate(params.id, { stage }, { new: true });
+    const lead = await Lead.findByIdAndUpdate(id, { stage }, { new: true });
 
     if (!lead) {
       return NextResponse.json({ message: 'Lead not found' }, { status: 404 });

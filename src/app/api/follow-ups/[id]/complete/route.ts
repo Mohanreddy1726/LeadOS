@@ -5,17 +5,18 @@ import { verifyAuth } from '@/lib/auth';
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
+    const { id } = await params;
 
     const authResult = await verifyAuth(req);
     if ('error' in authResult) {
       return NextResponse.json({ message: authResult.error }, { status: authResult.status });
     }
 
-    const followUp = await FollowUp.findByIdAndUpdate(params.id, { status: 'Completed' }, { new: true });
+    const followUp = await FollowUp.findByIdAndUpdate(id, { status: 'Completed' }, { new: true });
     if (!followUp) {
       return NextResponse.json({ message: 'Follow-up not found' }, { status: 404 });
     }
