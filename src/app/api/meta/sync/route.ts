@@ -135,10 +135,16 @@ export async function GET(req: NextRequest) {
 
     // Sync Leads
     console.log('Syncing leads...');
-    const leadsSynced = await syncMetaLeads();
+    let leadsSynced = 0;
+    try {
+      leadsSynced = await syncMetaLeads();
+    } catch (leadErr) {
+      console.error('Lead sync failed, but continuing with success response for assets:', leadErr);
+      // We don't throw here because campaigns/ads were already synced successfully
+    }
 
     return NextResponse.json({
-      message: 'All Meta assets and leads synced successfully',
+      message: 'Meta sync complete',
       campaigns: campaignsData.length,
       adsets: adSetsData.length,
       ads: adsData.length,
