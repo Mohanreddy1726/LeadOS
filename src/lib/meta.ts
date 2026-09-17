@@ -65,11 +65,11 @@ export async function fetchMetaLeadsList() {
   const { adAccountId, pageToken } = getConfig();
 
   try {
-    const pageId = await fetchPageId();
-    await logMetaSync(`Using Page ID ${pageId} for lead retrieval.`);
+    const { id: pageId, accessToken: pageAccessToken } = await fetchPageDetails();
+    await logMetaSync(`Using Page ID ${pageId} and Page Access Token for lead retrieval.`);
 
     // Step 1: Fetch all Leadgen Forms for the page
-    const formsUrl = `https://graph.facebook.com/v19.0/${pageId}/leadgen_forms?access_token=${pageToken}&fields=id,name`;
+    const formsUrl = `https://graph.facebook.com/v19.0/${pageId}/leadgen_forms?access_token=${pageAccessToken}&fields=id,name`;
     await logMetaSync(`Fetching forms from: ${formsUrl}`);
     const formsRes = await fetch(formsUrl);
 
@@ -92,7 +92,7 @@ export async function fetchMetaLeadsList() {
     // Step 2: Fetch leads for each form and combine them
     let allLeads = [];
     for (const form of formsData.data) {
-      const leadsUrl = `https://graph.facebook.com/v19.0/${form.id}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
+      const leadsUrl = `https://graph.facebook.com/v19.0/${form.id}/leads?access_token=${pageAccessToken}&fields=id,created_time&limit=100`;
       await logMetaSync(`Fetching leads for form ${form.id} (${form.name})`);
       const leadsRes = await fetch(leadsUrl);
       if (leadsRes.ok) {
@@ -110,7 +110,7 @@ export async function fetchMetaLeadsList() {
     return allLeads;
   } catch (err) {
     await logMetaSync(`Lead retrieval failed critical error: ${err}`, 'ERROR');
-    throw err; // Stop here so we don't fallback to the broken Ad Account endpoint
+    throw err;
   }
 }
 
