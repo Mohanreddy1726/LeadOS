@@ -33,6 +33,9 @@ export interface Lead {
   email: string;
   source: string;
   campaignId: string;
+  metaCampaignId?: string;
+  metaAdSetId?: string;
+  metaAdId?: string;
   score: number;
   quality: string;
   stage: string;
