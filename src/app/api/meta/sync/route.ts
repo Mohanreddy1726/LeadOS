@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     // Sync Campaigns
     await Promise.all(campaignsData.map(async (item: any) => {
       return Campaign.findOneAndUpdate(
-        { $or: [{ metaCampaignId: item.campaign_id }, { name: item.campaign_name, platform: 'Meta' }], platform: 'Meta' },
+        { metaCampaignId: item.campaign_id, platform: 'Meta' },
         {
           metaCampaignId: item.campaign_id,
           name: item.campaign_name,
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
     // Sync AdSets
     await Promise.all(adSetsData.map(async (item: any) => {
       return AdSet.findOneAndUpdate(
-        { $or: [{ metaAdSetId: item.adset_id }, { name: item.adset_name, platform: 'Meta' }], platform: 'Meta' },
+        { metaAdSetId: item.adset_id, platform: 'Meta' },
         {
           metaAdSetId: item.adset_id,
           name: item.adset_name,
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
     // Sync Ads
     await Promise.all(adsData.map(async (item: any) => {
       return Ad.findOneAndUpdate(
-        { $or: [{ metaAdId: item.ad_id }, { name: item.ad_name, platform: 'Meta' }], platform: 'Meta' },
+        { metaAdId: item.ad_id, platform: 'Meta' },
         {
           metaAdId: item.ad_id,
           name: item.ad_name,
