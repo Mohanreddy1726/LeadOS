@@ -42,7 +42,7 @@ export default function LeadsPage() {
 
   const filteredLeads = useMemo(() => {
     if (!leads) return [];
-    return leads.filter((l) => {
+    const result = leads.filter((l) => {
       const name = l.name || "";
       const phone = l.phone || "";
       const matchesSearch =
@@ -54,6 +54,8 @@ export default function LeadsPage() {
         filterStage === "all" || l.stage === filterStage;
       return matchesSearch && matchesQuality && matchesStage;
     });
+
+    return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [leads, search, filterQuality, filterStage]);
 
   return (
@@ -119,6 +121,7 @@ export default function LeadsPage() {
                     <th className="px-4 py-3 font-medium">Date Added</th>
                     <th className="px-4 py-3 font-medium">Lead</th>
                     <th className="px-4 py-3 font-medium">Phone</th>
+                    <th className="px-4 py-3 font-medium">Source</th>
                     <th className="px-4 py-3 font-medium">Country</th>
                     <th className="px-4 py-3 font-medium">City</th>
                     <th className="px-4 py-3 font-medium">NEET Qualified</th>
@@ -137,7 +140,13 @@ export default function LeadsPage() {
                     >
                       <td className="px-4 py-3 text-muted-foreground font-mono text-[10px]">
                         {l.createdAt
-                          ? new Date(l.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+                          ? new Date(l.createdAt).toLocaleString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            })
                           : "—"}
                       </td>
                       <td className="px-4 py-3">
@@ -154,6 +163,16 @@ export default function LeadsPage() {
                       </td>
                       <td className="px-4 py-3 font-mono text-[11px] text-muted-foreground">
                         {l.phone}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={cn(
+                          "text-[11px] font-medium px-2 py-0.5 rounded-full border",
+                          l.source?.toLowerCase().includes('meta') ? "bg-blue-50 text-blue-600 border-blue-100" :
+                          l.source?.toLowerCase().includes('google') ? "bg-green-50 text-green-600 border-green-100" :
+                          "bg-gray-50 text-gray-600 border-gray-100"
+                        )}>
+                          {l.source || "—"}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground truncate max-w-[120px]">
                         {l.destination || "—"}

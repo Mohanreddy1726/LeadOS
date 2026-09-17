@@ -98,6 +98,8 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
     aiSuccess: leads.filter(l => l.quality !== 'junk').length,
     followUps: leads.filter(l => l.stage === 'Contacted').length,
     applications: leads.filter(l => l.stage === 'Application').length,
+    metaLeads: leads.filter(l => l.source?.toLowerCase().includes('meta') || l.metaCampaignId).length,
+    googleLeads: leads.filter(l => l.source?.toLowerCase().includes('google')).length,
   };
 
   const qualitySplit = [
@@ -142,8 +144,8 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
     <>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <KpiCard label="Total Leads" value={totals.leads} delta="8.2%" hint="+1,420 this week" />
-        <KpiCard label="Qualified" value={totals.qualified} delta="5.1%" hint="62.8% rate" />
-        <KpiCard label="Junk filtered" value={totals.junk} delta="2.3%" positive={false} hint="23.3% of volume" />
+        <KpiCard label="Meta Leads" value={totals.metaLeads} delta="5.1%" hint="from ads/site" />
+        <KpiCard label="Google Leads" value={totals.googleLeads} delta="2.3%" positive={false} hint="from search" />
         <KpiCard label="AI Calls" value={totals.aiCalls} delta="11.9%" hint="75% connected" />
         <KpiCard label="Conversions" value={totals.conversions} delta="11.4%" hint="4.9% of leads" />
       </div>
