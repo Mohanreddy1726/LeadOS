@@ -279,7 +279,8 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
                     {campaignLeads ? ((c.conversions / campaignLeads) * 100).toFixed(1) : "0.0"}%
                   </td>
                 </tr>
-              })}
+              );
+            })}
             </tbody>
           </table>
         </div>
