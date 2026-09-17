@@ -11,6 +11,7 @@ export interface ILead extends Document {
   destination?: string;
   city?: string;
   neetQualified?: string;
+  metaLeadId?: string;
   quality: 'hot' | 'warm' | 'cold' | 'junk';
   score: number;
   stage: 'New' | 'Contacted' | 'Interested' | 'Qualified' | 'Applied' | 'Converted' | 'Junk';
@@ -35,6 +36,7 @@ const LeadSchema = new Schema<ILead>({
   destination: { type: String },
   city: { type: String },
   neetQualified: { type: String },
+  metaLeadId: { type: String, index: true },
   quality: {
     type: String,
     enum: ['hot', 'warm', 'cold', 'junk'],

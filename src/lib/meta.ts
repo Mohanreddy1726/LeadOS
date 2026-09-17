@@ -197,7 +197,9 @@ export async function processMetaLead(leadData: any) {
   const fields: Record<string, any> = {};
   if (Array.isArray(leadData.field_data)) {
     leadData.field_data.forEach((field: any) => {
-      fields[field.name] = field.values[0];
+      if (field.name && Array.isArray(field.values) && field.values.length > 0) {
+        fields[field.name] = field.values[0];
+      }
     });
   }
 
@@ -216,11 +218,12 @@ export async function processMetaLead(leadData: any) {
     metaAdId: leadData.ad_id,
     campaignId: leadData.campaign_id || leadData.ad_id,
     createdAt: new Date(leadData.created_time || Date.now()),
+    metaLeadId: leadData.id,
   };
 
-  // Use Meta Lead ID to avoid duplicates
+  // Use metaLeadId for duplicate checking instead of _id
   return Lead.findOneAndUpdate(
-    { _id: leadData.id },
+    { metaLeadId: leadData.id },
     mappedData,
     { upsert: true, new: true }
   );
