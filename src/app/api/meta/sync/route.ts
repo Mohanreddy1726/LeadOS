@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     await dbConnect();
 
-    logMetaSync('--- Meta Full Sync Started ---');
+    await logMetaSync('--- Meta Full Sync Started ---');
 
     // Fetch all performance and status data in parallel
     const [
@@ -135,12 +135,12 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Sync Leads
-    logMetaSync('Syncing leads...');
+    await logMetaSync('Syncing leads...');
     let leadsSynced = 0;
     try {
       leadsSynced = await syncMetaLeads();
     } catch (leadErr) {
-      logMetaSync(`Lead sync failed, but continuing with success response for assets: ${leadErr}`, 'ERROR');
+      await logMetaSync(`Lead sync failed, but continuing with success response for assets: ${leadErr}`, 'ERROR');
       // We don't throw here because campaigns/ads were already synced successfully
     }
 

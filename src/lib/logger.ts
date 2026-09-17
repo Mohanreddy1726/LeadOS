@@ -1,16 +1,16 @@
-import fs from 'fs';
-import path from 'path';
+import dbConnect from './db';
+import SyncLog from './models/SyncLog';
 
-const LOG_FILE = path.join(process.cwd(), 'meta-sync.log');
-
-export function logMetaSync(message: string, level: 'INFO' | 'WARN' | 'ERROR' = 'INFO') {
-  const timestamp = new Date().toISOString();
-  const logMessage = `[${timestamp}] [${level}] ${message}\n`;
-
+export async function logMetaSync(message: string, level: 'INFO' | 'WARN' | 'ERROR' = 'INFO') {
   try {
-    fs.appendFileSync(LOG_FILE, logMessage, 'utf8');
+    await dbConnect();
+    await SyncLog.create({
+      level,
+      message,
+      createdAt: new Date(),
+    });
   } catch (err) {
-    console.error('Failed to write to meta-sync log file:', err);
+    console.error('Failed to write to SyncLog database:', err);
   }
 
   // Also keep console logging for terminal visibility

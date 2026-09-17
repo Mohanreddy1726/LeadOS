@@ -21,15 +21,15 @@ async function fetchAllPages(url: string) {
   let nextUrl = url;
 
   while (nextUrl) {
-    logMetaSync(`Fetching Meta API: ${nextUrl}`);
+    await logMetaSync(`Fetching Meta API: ${nextUrl}`);
     const response = await fetch(nextUrl);
     if (!response.ok) {
       const errText = await response.text();
-      logMetaSync(`Meta API Error Response: ${errText}`, 'ERROR');
+      await logMetaSync(`Meta API Error Response: ${errText}`, 'ERROR');
       throw new Error(`Meta API error: ${response.statusText} - ${errText}`);
     }
     const result = await response.json();
-    logMetaSync(`Received ${result.data?.length || 0} items from page.`);
+    await logMetaSync(`Received ${result.data?.length || 0} items from page.`);
 
     if (result.data && Array.isArray(result.data)) {
       allData.push(...result.data);
@@ -58,11 +58,11 @@ export async function fetchMetaLeadsList() {
 
   try {
     const pageId = await fetchPageId();
-    logMetaSync(`Using Page ID ${pageId} for lead retrieval.`);
+    await logMetaSync(`Using Page ID ${pageId} for lead retrieval.`);
     const url = `https://graph.facebook.com/v19.0/${pageId}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
     return await fetchAllPages(url);
   } catch (err) {
-    logMetaSync(`Page-level lead retrieval failed or no Page ID found, falling back to Ad Account. Error: ${err}`, 'WARN');
+    await logMetaSync(`Page-level lead retrieval failed or no Page ID found, falling back to Ad Account. Error: ${err}`, 'WARN');
     const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
     return await fetchAllPages(url);
   }
@@ -123,7 +123,7 @@ export async function fetchMetaAdStatus() {
 export async function syncMetaLeads() {
   try {
     const leadsList = await fetchMetaLeadsList();
-    logMetaSync(`Found ${leadsList.length} leads to sync from Meta...`);
+    await logMetaSync(`Found ${leadsList.length} leads to sync from Meta...`);
 
     let processedCount = 0;
     for (const lead of leadsList) {
@@ -132,14 +132,14 @@ export async function syncMetaLeads() {
         await processMetaLead(leadData);
         processedCount++;
       } catch (err) {
-        logMetaSync(`Failed to sync lead ${lead.id}: ${err}`, 'ERROR');
+        await logMetaSync(`Failed to sync lead ${lead.id}: ${err}`, 'ERROR');
       }
     }
 
-    logMetaSync(`Successfully synced ${processedCount} leads.`);
+    await logMetaSync(`Successfully synced ${processedCount} leads.`);
     return processedCount;
   } catch (err) {
-    logMetaSync(`Meta Lead Sync Error: ${err}`, 'ERROR');
+    await logMetaSync(`Meta Lead Sync Error: ${err}`, 'ERROR');
     throw err;
   }
 }
