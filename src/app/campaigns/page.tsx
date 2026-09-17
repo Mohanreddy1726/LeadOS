@@ -10,8 +10,12 @@ const inr = (val: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
 
 export default function CampaignsPage() {
-  const { campaigns, leads, setCampaigns } = useStore();
+  const { campaigns, adsets, ads, leads, setCampaigns, setAdsets, setAds } = useStore();
+  const [view, setView] = useState<"campaigns" | "adsets" | "ads">("campaigns");
   const [syncing, setSyncing] = useState(false);
+
+  const currentData = view === "campaigns" ? campaigns : view === "adsets" ? adsets : ads;
+
   const totalSpend = campaigns.reduce((s, c) => s + (c.spend || 0), 0);
   const totalLeads = leads.length;
   const totalConverted = leads.filter(l => l.stage === "Converted").length;
@@ -26,10 +30,18 @@ export default function CampaignsPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.data) {
-          setCampaigns(data.data);
-        }
-        alert("Campaigns synced successfully!");
+        // The sync API now returns counts, not the full list.
+        // We need to fetch the latest data from the database.
+        const [cRes, asRes, adRes] = await Promise.all([
+          fetch("/api/campaigns", { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch("/api/adsets", { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch("/api/ads", { headers: { "Authorization": `Bearer ${token}` } }),
+        ]);
+        if (cRes.ok) setCampaigns(await cRes.json());
+        if (asRes.ok) setAdsets(await asRes.json());
+        if (adRes.ok) setAds(await adRes.json());
+
+        alert("All Meta assets synced successfully!");
       } else {
         alert("Failed to sync campaigns.");
       }
@@ -78,9 +90,22 @@ export default function CampaignsPage() {
         <Panel>
           <PanelHead
             title="Channel Breakdown"
-            hint="Granular performance metrics by campaign and platform"
+            hint="Granular performance metrics by campaign, adset and ad"
             action={
               <div className="flex gap-2">
+                <div className="flex p-1 bg-muted rounded-xl mr-2">
+                  {(["campaigns", "adsets", "ads"] as const).map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setView(v)}
+                      className={`px-3 py-1 rounded-lg text-[11px] font-medium transition-all ${
+                        view === v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {v.charAt(0).toUpperCase() + v.slice(1, -1)}
+                    </button>
+                  ))}
+                </div>
                 <button
                   onClick={handleSync}
                   disabled={syncing}
@@ -96,7 +121,7 @@ export default function CampaignsPage() {
             <table className="w-full text-[12px] text-left border-collapse">
               <thead className="border-b border-border text-muted-foreground mono-label">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Campaign</th>
+                  <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Platform</th>
                   <th className="px-4 py-3 font-medium">Reach</th>
@@ -111,8 +136,8 @@ export default function CampaignsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {campaigns.map((c) => {
-                  const campaignLeads = leads.filter(l => l.campaignId === c.metaCampaignId || l.campaignId === c._id || l.campaignId === c.id);
+                {currentData.map((c) => {
+                  const campaignLeads = leads.filter(l => l.campaignId === c.metaCampaignId || l.campaignId === c._id || l.campaignId === c.id || l.campaignId === c.metaAdSetId || l.campaignId === c.metaAdId);
                   const qualified = campaignLeads.filter(l => l.stage === "Qualified").length;
                   const conversions = campaignLeads.filter(l => l.stage === "Converted").length;
                   const leadCount = campaignLeads.length;

@@ -35,12 +35,52 @@ export async function syncCampaignPerformance() {
   return response.json();
 }
 
+export async function syncAdSetPerformance() {
+  const { adAccountId, pageToken } = getConfig();
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=adset_id,adset_name,campaign_id,spend,impressions,clicks,conversions,reach&level=adset&access_token=${pageToken}`;
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Meta Insights API error: ${response.statusText}`);
+
+  return response.json();
+}
+
+export async function syncAdPerformance() {
+  const { adAccountId, pageToken } = getConfig();
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=ad_id,ad_name,adset_id,campaign_id,spend,impressions,clicks,conversions,reach&level=ad&access_token=${pageToken}`;
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Meta Insights API error: ${response.statusText}`);
+
+  return response.json();
+}
+
 export async function fetchMetaCampaignStatus() {
   const { adAccountId, pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns?fields=id,status&access_token=${pageToken}`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Meta Campaigns API error: ${response.statusText}`);
+
+  return response.json();
+}
+
+export async function fetchMetaAdSetStatus() {
+  const { adAccountId, pageToken } = getConfig();
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/adsets?fields=id,status&access_token=${pageToken}`;
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Meta AdSet API error: ${response.statusText}`);
+
+  return response.json();
+}
+
+export async function fetchMetaAdStatus() {
+  const { adAccountId, pageToken } = getConfig();
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/ads?fields=id,status&access_token=${pageToken}`;
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Meta Ad API error: ${response.statusText}`);
 
   return response.json();
 }

@@ -81,6 +81,10 @@ interface Store {
   fetchTeam: () => Promise<void>;
   campaigns: any[];
   setCampaigns: (c: any[]) => void;
+  adsets: any[];
+  setAdsets: (a: any[]) => void;
+  ads: any[];
+  setAds: (a: any[]) => void;
   aiCalls: any[];
   applications: any[];
   activity: any[];
@@ -101,6 +105,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [team, setTeam] = useState<any[]>([]);
   const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [adsets, setAdsets] = useState<any[]>([]);
+  const [ads, setAds] = useState<any[]>([]);
   const [aiCalls, setAiCalls] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [activity, setActivity] = useState<any[]>([]);
@@ -344,6 +350,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       fetchTeam,
       campaigns,
       setCampaigns,
+      adsets,
+      setAdsets,
+      ads,
+      setAds,
       aiCalls,
       applications,
       activity,
@@ -369,6 +379,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       fetchTeam,
       campaigns,
       setCampaigns,
+      adsets,
+      setAdsets,
+      ads,
+      setAds,
       aiCalls,
       applications,
       activity,

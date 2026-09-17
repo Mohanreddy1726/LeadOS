@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { syncCampaignPerformance, fetchMetaCampaignStatus } from '@/lib/meta';
+import { syncCampaignPerformance, syncAdSetPerformance, syncAdPerformance, fetchMetaCampaignStatus, fetchMetaAdSetStatus, fetchMetaAdStatus } from '@/lib/meta';
 import dbConnect from '@/lib/db';
 import Campaign from '@/lib/models/Campaign';
+import AdSet from '@/lib/models/AdSet';
+import Ad from '@/lib/models/Ad';
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,52 +14,96 @@ export async function GET(req: NextRequest) {
 
     await dbConnect();
 
-    console.log('--- Meta Campaign Sync Started ---');
+    console.log('--- Meta Full Sync Started ---');
 
-    // Fetch performance and statuses in parallel
-    const [performanceResponse, statusResponse] = await Promise.all([
+    // Fetch all performance and status data in parallel
+    const [
+      campaignPerf, adSetPerf, adPerf,
+      campaignStat, adSetStat, adStat
+    ] = await Promise.all([
       syncCampaignPerformance(),
+      syncAdSetPerformance(),
+      syncAdPerformance(),
       fetchMetaCampaignStatus(),
+      fetchMetaAdSetStatus(),
+      fetchMetaAdStatus(),
     ]);
 
-    const campaignsData = performanceResponse.data || [];
-    const statusesData = statusResponse.data || [];
+    const campaignsData = campaignPerf.data || [];
+    const adSetsData = adSetPerf.data || [];
+    const adsData = adPerf.data || [];
 
-    // Create a map for quick status lookup: campaign_id -> status
-    const statusMap = new Map();
-    statusesData.forEach((s: any) => statusMap.set(s.id, s.status));
+    const campaignStatusMap = new Map();
+    (campaignStat.data || []).forEach((s: any) => campaignStatusMap.set(s.id, s.status));
 
-    console.log(`Found ${campaignsData.length} campaigns to sync`);
+    const adSetStatusMap = new Map();
+    (adSetStat.data || []).forEach((s: any) => adSetStatusMap.set(s.id, s.status));
 
-    const syncResults = await Promise.all(
-      campaignsData.map(async (item: any) => {
-        return Campaign.findOneAndUpdate(
-          {
-            $or: [
-              { metaCampaignId: item.campaign_id },
-              { name: item.campaign_name, platform: 'Meta' }
-            ],
-            platform: 'Meta'
-          },
-          {
-            metaCampaignId: item.campaign_id,
-            name: item.campaign_name,
-            status: statusMap.get(item.campaign_id),
-            spend: parseFloat(item.spend || '0'),
-            impressions: parseInt(item.impressions || '0', 10),
-            clicks: parseInt(item.clicks || '0', 10),
-            conversions: parseInt(item.conversions || '0', 10),
-            reach: parseInt(item.reach || '0', 10),
-          },
-          { upsert: true, new: true }
-        );
-      })
-    );
+    const adStatusMap = new Map();
+    (adStat.data || []).forEach((s: any) => adStatusMap.set(s.id, s.status));
+
+    // Sync Campaigns
+    await Promise.all(campaignsData.map(async (item: any) => {
+      return Campaign.findOneAndUpdate(
+        { $or: [{ metaCampaignId: item.campaign_id }, { name: item.campaign_name, platform: 'Meta' }], platform: 'Meta' },
+        {
+          metaCampaignId: item.campaign_id,
+          name: item.campaign_name,
+          status: campaignStatusMap.get(item.campaign_id),
+          spend: parseFloat(item.spend || '0'),
+          impressions: parseInt(item.impressions || '0', 10),
+          clicks: parseInt(item.clicks || '0', 10),
+          conversions: parseInt(item.conversions || '0', 10),
+          reach: parseInt(item.reach || '0', 10),
+        },
+        { upsert: true, new: true }
+      );
+    }));
+
+    // Sync AdSets
+    await Promise.all(adSetsData.map(async (item: any) => {
+      return AdSet.findOneAndUpdate(
+        { $or: [{ metaAdSetId: item.adset_id }, { name: item.adset_name, platform: 'Meta' }], platform: 'Meta' },
+        {
+          metaAdSetId: item.adset_id,
+          name: item.adset_name,
+          campaignId: item.campaign_id,
+          status: adSetStatusMap.get(item.adset_id),
+          spend: parseFloat(item.spend || '0'),
+          impressions: parseInt(item.impressions || '0', 10),
+          clicks: parseInt(item.clicks || '0', 10),
+          conversions: parseInt(item.conversions || '0', 10),
+          reach: parseInt(item.reach || '0', 10),
+        },
+        { upsert: true, new: true }
+      );
+    }));
+
+    // Sync Ads
+    await Promise.all(adsData.map(async (item: any) => {
+      return Ad.findOneAndUpdate(
+        { $or: [{ metaAdId: item.ad_id }, { name: item.ad_name, platform: 'Meta' }], platform: 'Meta' },
+        {
+          metaAdId: item.ad_id,
+          name: item.ad_name,
+          adSetId: item.adset_id,
+          campaignId: item.campaign_id,
+          status: adStatusMap.get(item.ad_id),
+          spend: parseFloat(item.spend || '0'),
+          impressions: parseInt(item.impressions || '0', 10),
+          clicks: parseInt(item.clicks || '0', 10),
+          conversions: parseInt(item.conversions || '0', 10),
+          reach: parseInt(item.reach || '0', 10),
+        },
+        { upsert: true, new: true }
+      );
+    }));
 
     return NextResponse.json({
-      message: 'Campaign performance synced successfully',
-      count: syncResults.length,
-      data: syncResults
+      message: 'All Meta assets synced successfully',
+      campaigns: campaignsData.length,
+      adsets: adSetsData.length,
+      ads: adsData.length,
     }, { status: 200 });
 
   } catch (err: any) {
