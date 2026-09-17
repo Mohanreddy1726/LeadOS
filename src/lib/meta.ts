@@ -36,7 +36,10 @@ async function fetchAllPages(url: string) {
 
 export async function fetchMetaLeadsList() {
   const { adAccountId, pageToken } = getConfig();
-  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/leads?access_token=${pageToken}&fields=id,created_time`;
+  // Updated URL to use the Page ID instead of Ad Account ID if possible,
+  // but since we have adAccountId, we use the act_{id}/leads endpoint.
+  // Adding 'limit=100' to ensure we get a good batch.
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
 
   return fetchAllPages(url);
 }
