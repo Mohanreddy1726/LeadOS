@@ -27,10 +27,20 @@ export async function fetchMetaLeadData(leadgenId: string) {
 
 export async function syncCampaignPerformance() {
   const { adAccountId, pageToken } = getConfig();
-  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=campaign_name,spend,impressions,clicks,conversions&level=campaign&access_token=${pageToken}`;
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,conversions,reach&level=campaign&access_token=${pageToken}`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Meta Insights API error: ${response.statusText}`);
+
+  return response.json();
+}
+
+export async function fetchMetaCampaignStatus() {
+  const { adAccountId, pageToken } = getConfig();
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns?fields=id,status&access_token=${pageToken}`;
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Meta Campaigns API error: ${response.statusText}`);
 
   return response.json();
 }

@@ -3,6 +3,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ICampaign extends Document {
   name: string;
   platform: string;
+  metaCampaignId?: string;
+  status?: string;
+  reach?: number;
   spend: number;
   impressions: number;
   clicks: number;
@@ -14,6 +17,9 @@ export interface ICampaign extends Document {
 const CampaignSchema = new Schema<ICampaign>({
   name: { type: String, required: true },
   platform: { type: String, required: true },
+  metaCampaignId: { type: String },
+  status: { type: String },
+  reach: { type: Number, default: 0 },
   spend: { type: Number, default: 0 },
   impressions: { type: Number, default: 0 },
   clicks: { type: Number, default: 0 },

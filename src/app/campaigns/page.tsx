@@ -89,9 +89,6 @@ export default function CampaignsPage() {
                   <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} />
                   {syncing ? "Syncing..." : "Sync Meta"}
                 </button>
-                <button className="h-8 rounded-xl bg-primary px-3 text-[12px] font-medium text-primary-foreground">
-                  New Campaign
-                </button>
               </div>
             }
           />
@@ -100,8 +97,11 @@ export default function CampaignsPage() {
               <thead className="border-b border-border text-muted-foreground mono-label">
                 <tr>
                   <th className="px-4 py-3 font-medium">Campaign</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Platform</th>
+                  <th className="px-4 py-3 font-medium">Reach</th>
                   <th className="px-4 py-3 font-medium">Spend</th>
+                  <th className="px-4 py-3 font-medium">CPC</th>
                   <th className="px-4 py-3 font-medium">Leads</th>
                   <th className="px-4 py-3 font-medium">CPL</th>
                   <th className="px-4 py-3 font-medium">Qualified</th>
@@ -112,15 +112,23 @@ export default function CampaignsPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {campaigns.map((c) => {
-                  const campaignLeads = leads.filter(l => l.campaignId === c._id || l.campaignId === c.id);
+                  const campaignLeads = leads.filter(l => l.campaignId === c.metaCampaignId || l.campaignId === c._id || l.campaignId === c.id);
                   const qualified = campaignLeads.filter(l => l.stage === "Qualified").length;
                   const conversions = campaignLeads.filter(l => l.stage === "Converted").length;
                   const leadCount = campaignLeads.length;
+                  const cpc = c.clicks > 0 ? (c.spend || 0) / c.clicks : 0;
                   return (
                     <tr key={c._id || c.id} className="group transition-colors hover:bg-foreground/[0.02]">
                       <td className="px-4 py-3 font-medium">{c.name}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium ${c.status === 'ACTIVE' ? 'bg-ok/10 text-ok' : 'bg-muted text-muted-foreground'}`}>
+                          {c.status || 'Unknown'}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground">{c.platform}</td>
+                      <td className="px-4 py-3 font-mono">{ (c.reach || 0).toLocaleString("en-IN") }</td>
                       <td className="px-4 py-3 font-mono">{inr(c.spend || 0)}</td>
+                      <td className="px-4 py-3 font-mono">{cpc > 0 ? inr(cpc) : "—"}</td>
                       <td className="px-4 py-3 font-mono">{leadCount.toLocaleString("en-IN")}</td>
                       <td className="px-4 py-3 font-mono">{leadCount > 0 ? inr(Math.round((c.spend || 0) / leadCount)) : "—"}</td>
                       <td className="px-4 py-3 font-mono">{qualified.toLocaleString("en-IN")}</td>
