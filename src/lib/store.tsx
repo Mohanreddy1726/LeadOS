@@ -45,6 +45,7 @@ export interface Lead {
   destination: string;
   city?: string;
   neetQualified?: string;
+  metaLeadId?: string;
   budget: string;
   intake: string;
   academic: string;
