@@ -264,23 +264,24 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
             </thead>
             <tbody className="divide-y divide-border">
               {campaigns.map((c, index) => {
-                const campaignLeads = leads.filter(l => l.campaignId === c.id).length;
-                const qualifiedLeads = leads.filter(l => l.campaignId === c.id && l.quality !== 'junk').length;
+                const campaignId = c.id || c._id;
+                const campaignLeads = leads.filter(l => l.campaignId === campaignId).length;
+                const qualifiedLeads = leads.filter(l => l.campaignId === campaignId && l.quality !== 'junk').length;
                 return (
-                  <tr key={c.id || c._id || index} className="transition-colors hover:bg-foreground/[0.03]">
+                  <tr key={campaignId || index} className="transition-colors hover:bg-foreground/[0.03]">
                   <td className="px-3 py-2.5 font-medium">{c.name}</td>
                   <td className="px-3 py-2.5 text-muted-foreground">{c.platform}</td>
-                  <td className="font-mono px-3 py-2.5">{inr(c.spend)}</td>
+                  <td className="font-mono px-3 py-2.5">{inr(c.spend ?? 0)}</td>
                   <td className="font-mono px-3 py-2.5">{campaignLeads.toLocaleString("en-IN")}</td>
                   <td className="font-mono px-3 py-2.5">{c.spend && campaignLeads ? inr(Math.round(c.spend / campaignLeads)) : "—"}</td>
                   <td className="font-mono px-3 py-2.5">{qualifiedLeads.toLocaleString("en-IN")}</td>
                   <td className="font-mono px-3 py-2.5">
                     {c.spend && qualifiedLeads ? inr(Math.round(c.spend / qualifiedLeads)) : "—"}
                   </td>
-                  <td className="font-mono px-3 py-2.5">{c.applications}</td>
-                  <td className="font-mono px-3 py-2.5">{c.conversions}</td>
+                  <td className="font-mono px-3 py-2.5">{c.applications ?? 0}</td>
+                  <td className="font-mono px-3 py-2.5">{c.conversions ?? 0}</td>
                   <td className="font-mono px-3 py-2.5">
-                    {campaignLeads ? ((c.conversions / campaignLeads) * 100).toFixed(1) : "0.0"}%
+                    {campaignLeads ? (((c.conversions ?? 0) / campaignLeads) * 100).toFixed(1) : "0.0"}%
                   </td>
                 </tr>
               );
