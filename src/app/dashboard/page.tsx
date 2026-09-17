@@ -91,12 +91,12 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
 
   const totals = {
     leads: new Set(leads.map(l => normalizePhone(l.phone))).size,
-    qualified: new Set(leads.filter(l => l.quality !== 'junk').map(l => normalizePhone(l.phone))).size,
+    qualified: 0,
     junk: new Set(leads.filter(l => l.quality === 'junk').map(l => normalizePhone(l.phone))).size,
     aiCalls: leads.length, // approximation
     conversions: new Set(leads.filter(l => l.stage === 'Converted').map(l => normalizePhone(l.phone))).size,
     newLeads: new Set(leads.filter(l => l.stage === 'New').map(l => normalizePhone(l.phone))).size,
-    aiSuccess: new Set(leads.filter(l => l.quality !== 'junk').map(l => normalizePhone(l.phone))).size,
+    aiSuccess: 0,
     followUps: new Set(leads.filter(l => l.stage === 'Contacted').map(l => normalizePhone(l.phone))).size,
     applications: new Set(leads.filter(l => l.stage === 'Application').map(l => normalizePhone(l.phone))).size,
     metaLeads: new Set(leads.filter(l => (l.source || '').toLowerCase().includes('meta') || l.metaCampaignId).map(l => normalizePhone(l.phone))).size,
