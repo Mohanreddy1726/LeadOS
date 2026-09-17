@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { Panel, PanelHead, KpiCard } from "@/components/bits";
 import { useStore } from "@/lib/store";
@@ -10,6 +11,7 @@ const inr = (val: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
 
 export default function CampaignsPage() {
+  const router = useRouter();
   const { campaigns, adsets, ads, leads, setCampaigns, setAdsets, setAds } = useStore();
   const [view, setView] = useState<"campaigns" | "adsets" | "ads">("campaigns");
   const [syncing, setSyncing] = useState(false);
@@ -161,7 +163,11 @@ export default function CampaignsPage() {
                   const leadCount = c.conversions || 0;
                   const cpc = c.clicks > 0 ? (c.spend || 0) / c.clicks : 0;
                   return (
-                    <tr key={c._id || c.id} className="group transition-colors hover:bg-foreground/[0.02]">
+                    <tr
+                      key={c._id || c.id}
+                      onClick={() => router.push(`/campaigns/insights/${c._id || c.id}`)}
+                      className="group cursor-pointer transition-colors hover:bg-foreground/[0.02]"
+                    >
                       <td className="px-4 py-3 font-medium">{c.name}</td>
                       <td className="px-4 py-3">
                         <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium ${c.status === 'ACTIVE' ? 'bg-ok/10 text-ok' : 'bg-muted text-muted-foreground'}`}>
