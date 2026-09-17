@@ -43,6 +43,9 @@ export async function GET(req: NextRequest) {
     await Promise.all(campaignsData.map(async (item: any) => {
       seenCampaignIds.add(item.campaign_id);
       const status = campaignStatusMap.get(item.campaign_id) || 'INACTIVE';
+      const conversions = item.conversions ||
+                           (item.actions && item.actions.find((a: any) => a.action_type === 'lead')?.value) ||
+                           0;
       return Campaign.findOneAndUpdate(
         { metaCampaignId: item.campaign_id, platform: 'Meta' },
         {
@@ -52,7 +55,7 @@ export async function GET(req: NextRequest) {
           spend: parseFloat(item.spend || '0'),
           impressions: parseInt(item.impressions || '0', 10),
           clicks: parseInt(item.clicks || '0', 10),
-          conversions: parseInt(item.conversions || '0', 10),
+          conversions: parseInt(conversions || '0', 10),
           reach: parseInt(item.reach || '0', 10),
         },
         { upsert: true, new: true }
@@ -65,6 +68,9 @@ export async function GET(req: NextRequest) {
       seenAdSetIds.add(item.adset_id);
       const campaignStatus = campaignStatusMap.get(item.campaign_id) || 'INACTIVE';
       const adSetStatus = adSetStatusMap.get(item.adset_id) || 'INACTIVE';
+      const conversions = item.conversions ||
+                           (item.actions && item.actions.find((a: any) => a.action_type === 'lead')?.value) ||
+                           0;
       // Effective status: Active only if both AdSet and Campaign are Active
       const effectiveStatus = (campaignStatus === 'ACTIVE' && adSetStatus === 'ACTIVE')
         ? 'ACTIVE'
@@ -80,7 +86,7 @@ export async function GET(req: NextRequest) {
           spend: parseFloat(item.spend || '0'),
           impressions: parseInt(item.impressions || '0', 10),
           clicks: parseInt(item.clicks || '0', 10),
-          conversions: parseInt(item.conversions || '0', 10),
+          conversions: parseInt(conversions || '0', 10),
           reach: parseInt(item.reach || '0', 10),
         },
         { upsert: true, new: true }
@@ -94,6 +100,9 @@ export async function GET(req: NextRequest) {
       const campaignStatus = campaignStatusMap.get(item.campaign_id) || 'INACTIVE';
       const adSetStatus = adSetStatusMap.get(item.adset_id) || 'INACTIVE';
       const adStatus = adStatusMap.get(item.ad_id) || 'INACTIVE';
+      const conversions = item.conversions ||
+                           (item.actions && item.actions.find((a: any) => a.action_type === 'lead')?.value) ||
+                           0;
       // Effective status: Active only if Campaign, AdSet, and Ad are all Active
       const effectiveStatus = (campaignStatus === 'ACTIVE' && adSetStatus === 'ACTIVE' && adStatus === 'ACTIVE')
         ? 'ACTIVE'
@@ -110,7 +119,7 @@ export async function GET(req: NextRequest) {
           spend: parseFloat(item.spend || '0'),
           impressions: parseInt(item.impressions || '0', 10),
           clicks: parseInt(item.clicks || '0', 10),
-          conversions: parseInt(item.conversions || '0', 10),
+          conversions: parseInt(conversions || '0', 10),
           reach: parseInt(item.reach || '0', 10),
         },
         { upsert: true, new: true }

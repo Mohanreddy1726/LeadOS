@@ -46,21 +46,21 @@ export async function fetchMetaLeadData(leadgenId: string) {
 
 export async function syncCampaignPerformance() {
   const { adAccountId, pageToken } = getConfig();
-  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,conversions,reach&level=campaign&date_preset=maximum&access_token=${pageToken}`;
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,conversions,reach,actions&level=campaign&date_preset=maximum&access_token=${pageToken}`;
 
   return fetchAllPages(url);
 }
 
 export async function syncAdSetPerformance() {
   const { adAccountId, pageToken } = getConfig();
-  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=adset_id,adset_name,campaign_id,spend,impressions,clicks,conversions,reach&level=adset&date_preset=maximum&access_token=${pageToken}`;
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=adset_id,adset_name,campaign_id,spend,impressions,clicks,conversions,reach,actions&level=adset&date_preset=maximum&access_token=${pageToken}`;
 
   return fetchAllPages(url);
 }
 
 export async function syncAdPerformance() {
   const { adAccountId, pageToken } = getConfig();
-  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=ad_id,ad_name,adset_id,campaign_id,spend,impressions,clicks,conversions,reach&level=ad&date_preset=maximum&access_token=${pageToken}`;
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=ad_id,ad_name,adset_id,campaign_id,spend,impressions,clicks,conversions,reach,actions&level=ad&date_preset=maximum&access_token=${pageToken}`;
 
   return fetchAllPages(url);
 }
