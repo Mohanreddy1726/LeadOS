@@ -156,7 +156,9 @@ export default function CampaignsPage() {
                   );
                   const qualified = campaignLeads.filter(l => l.stage === "Qualified").length;
                   const conversions = campaignLeads.filter(l => l.stage === "Converted").length;
-                  const leadCount = campaignLeads.length;
+
+                  // Use the synced 'conversions' metric from Meta as the primary "Results" count
+                  const leadCount = c.conversions || 0;
                   const cpc = c.clicks > 0 ? (c.spend || 0) / c.clicks : 0;
                   return (
                     <tr key={c._id || c.id} className="group transition-colors hover:bg-foreground/[0.02]">
