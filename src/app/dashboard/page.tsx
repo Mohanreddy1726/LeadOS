@@ -203,7 +203,7 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
                 {callerPerf.map((p) => {
                   const m = team.find(t => t.memberId === p.id)!;
                   return (
-                    <tr key={p.id} className="transition-colors hover:bg-foreground/[0.03]">
+                    <tr key={`${p.id}-${m.memberId}`} className="transition-colors hover:bg-foreground/[0.03]">
                       <td className="px-3 py-2.5">
                         <div className="flex items-center gap-2">
                           <Avatar
