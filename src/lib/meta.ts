@@ -44,8 +44,13 @@ async function fetchAllPages(url: string) {
 export async function fetchPageId() {
   const { pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/me/accounts?access_token=${pageToken}`;
+  await logMetaSync(`Fetching Page ID from: ${url}`);
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`Failed to fetch Page ID: ${response.statusText}`);
+  if (!response.ok) {
+    const errText = await response.text();
+    await logMetaSync(`Failed to fetch Page ID. Status: ${response.status}, Body: ${errText}`, 'ERROR');
+    throw new Error(`Failed to fetch Page ID: ${response.statusText}`);
+  }
   const result = await response.json();
   if (result.data && result.data.length > 0) {
     return result.data[0].id;
@@ -62,12 +67,20 @@ export async function fetchMetaLeadsList() {
 
     // Step 1: Fetch all Leadgen Forms for the page
     const formsUrl = `https://graph.facebook.com/v19.0/${pageId}/leadgen_forms?access_token=${pageToken}&fields=id,name`;
+    await logMetaSync(`Fetching forms from: ${formsUrl}`);
     const formsRes = await fetch(formsUrl);
-    if (!formsRes.ok) throw new Error(`Failed to fetch leadgen forms: ${formsRes.statusText}`);
+
+    if (!formsRes.ok) {
+      const errText = await formsRes.text();
+      await logMetaSync(`Failed to fetch leadgen forms. Status: ${formsRes.status}, Body: ${errText}`, 'ERROR');
+      throw new Error(`Failed to fetch leadgen forms: ${formsRes.statusText}`);
+    }
+
     const formsData = await formsRes.json();
+    await logMetaSync(`Forms response received: ${JSON.stringify(formsData)}`);
 
     if (!formsData.data || formsData.data.length === 0) {
-      await logMetaSync(`No leadgen forms found for Page ${pageId}.`, 'WARN');
+      await logMetaSync(`No leadgen forms found for Page ${pageId}. Please check if forms are created and the token has leads_retrieval permission.`, 'WARN');
       return [];
     }
 
@@ -77,23 +90,24 @@ export async function fetchMetaLeadsList() {
     let allLeads = [];
     for (const form of formsData.data) {
       const leadsUrl = `https://graph.facebook.com/v19.0/${form.id}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
+      await logMetaSync(`Fetching leads for form ${form.id} (${form.name})`);
       const leadsRes = await fetch(leadsUrl);
       if (leadsRes.ok) {
         const leadsData = await leadsRes.json();
         if (leadsData.data) {
+          await logMetaSync(`Found ${leadsData.data.length} leads in form ${form.id}`);
           allLeads.push(...leadsData.data);
         }
       } else {
-        await logMetaSync(`Failed to fetch leads for form ${form.id}: ${leadsRes.statusText}`, 'WARN');
+        const errText = await leadsRes.text();
+        await logMetaSync(`Failed to fetch leads for form ${form.id}: ${leadsRes.status} - ${errText}`, 'ERROR');
       }
     }
 
     return allLeads;
   } catch (err) {
-    await logMetaSync(`Lead retrieval failed. Error: ${err}`, 'ERROR');
-    // Fallback to Ad Account is unlikely to work if the form-level fetch failed, but we keep it for safety
-    const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
-    return await fetchAllPages(url);
+    await logMetaSync(`Lead retrieval failed critical error: ${err}`, 'ERROR');
+    throw err; // Stop here so we don't fallback to the broken Ad Account endpoint
   }
 }
 
