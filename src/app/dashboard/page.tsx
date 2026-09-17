@@ -259,24 +259,27 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {campaigns.map((c) => (
-                <tr key={c.id} className="transition-colors hover:bg-foreground/[0.03]">
+              {campaigns.map((c) => {
+                const campaignLeads = leads.filter(l => l.campaignId === c.id).length;
+                const qualifiedLeads = leads.filter(l => l.campaignId === c.id && l.quality !== 'junk').length;
+                return (
+                  <tr key={c.id} className="transition-colors hover:bg-foreground/[0.03]">
                   <td className="px-3 py-2.5 font-medium">{c.name}</td>
                   <td className="px-3 py-2.5 text-muted-foreground">{c.platform}</td>
                   <td className="font-mono px-3 py-2.5">{inr(c.spend)}</td>
-                  <td className="font-mono px-3 py-2.5">{c.leads.toLocaleString("en-IN")}</td>
-                  <td className="font-mono px-3 py-2.5">{c.spend ? inr(Math.round(c.spend / c.leads)) : "—"}</td>
-                  <td className="font-mono px-3 py-2.5">{c.qualified.toLocaleString("en-IN")}</td>
+                  <td className="font-mono px-3 py-2.5">{campaignLeads.toLocaleString("en-IN")}</td>
+                  <td className="font-mono px-3 py-2.5">{c.spend && campaignLeads ? inr(Math.round(c.spend / campaignLeads)) : "—"}</td>
+                  <td className="font-mono px-3 py-2.5">{qualifiedLeads.toLocaleString("en-IN")}</td>
                   <td className="font-mono px-3 py-2.5">
-                    {c.spend ? inr(Math.round(c.spend / c.qualified)) : "—"}
+                    {c.spend && qualifiedLeads ? inr(Math.round(c.spend / qualifiedLeads)) : "—"}
                   </td>
                   <td className="font-mono px-3 py-2.5">{c.applications}</td>
                   <td className="font-mono px-3 py-2.5">{c.conversions}</td>
                   <td className="font-mono px-3 py-2.5">
-                    {((c.conversions / c.leads) * 100).toFixed(1)}%
+                    {campaignLeads ? ((c.conversions / campaignLeads) * 100).toFixed(1) : "0.0"}%
                   </td>
                 </tr>
-              ))}
+              })}
             </tbody>
           </table>
         </div>
