@@ -8,6 +8,9 @@ export interface ILead extends Document {
   program?: string;
   academic?: string;
   intake?: string;
+  destination?: string;
+  city?: string;
+  neetQualified?: string;
   quality: 'hot' | 'warm' | 'cold' | 'junk';
   score: number;
   stage: 'New' | 'Contacted' | 'Interested' | 'Qualified' | 'Applied' | 'Converted' | 'Junk';
@@ -29,6 +32,9 @@ const LeadSchema = new Schema<ILead>({
   program: { type: String },
   academic: { type: String },
   intake: { type: String },
+  destination: { type: String },
+  city: { type: String },
+  neetQualified: { type: String },
   quality: {
     type: String,
     enum: ['hot', 'warm', 'cold', 'junk'],

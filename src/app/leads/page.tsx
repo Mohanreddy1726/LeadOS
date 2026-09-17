@@ -113,12 +113,15 @@ export default function LeadsPage() {
               <table className="w-full text-[12px] text-left border-collapse">
                 <thead>
                   <tr className="border-b border-border text-muted-foreground mono-label">
+                    <th className="px-4 py-3 font-medium">Date Added</th>
                     <th className="px-4 py-3 font-medium">Lead</th>
+                    <th className="px-4 py-3 font-medium">Phone</th>
+                    <th className="px-4 py-3 font-medium">Country</th>
+                    <th className="px-4 py-3 font-medium">City</th>
+                    <th className="px-4 py-3 font-medium">NEET Qualified</th>
                     <th className="px-4 py-3 font-medium">Score</th>
                     <th className="px-4 py-3 font-medium">Quality</th>
                     <th className="px-4 py-3 font-medium">Stage</th>
-                    <th className="px-4 py-3 font-medium">Campaign</th>
-                    <th className="px-4 py-3 font-medium">Program</th>
                     <th className="px-4 py-3 font-medium text-right">Action</th>
                   </tr>
                 </thead>
@@ -129,6 +132,9 @@ export default function LeadsPage() {
                       className="group transition-colors hover:bg-foreground/[0.02] cursor-pointer"
                       onClick={() => setActive(l)}
                     >
+                      <td className="px-4 py-3 text-muted-foreground font-mono text-[10px]">
+                        {new Date(l.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
                           <Avatar
@@ -138,9 +144,25 @@ export default function LeadsPage() {
                           />
                           <div className="min-w-0">
                             <div className="font-medium truncate">{l.name}</div>
-                            <div className="font-mono text-[10px] text-faint truncate">{l.phone}</div>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-[11px] text-muted-foreground">
+                        {l.phone}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground truncate max-w-[120px]">
+                        {l.destination || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground truncate max-w-[120px]">
+                        {l.city || "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={cn(
+                          "pill text-[10px] font-medium",
+                          l.neetQualified?.toLowerCase() === 'yes' ? "bg-ok-soft text-ok" : "bg-muted text-muted-foreground"
+                        )}>
+                          {l.neetQualified || "—"}
+                        </span>
                       </td>
                       <td className="px-4 py-3">
                         <ScoreBadge score={l.score} />
@@ -150,12 +172,6 @@ export default function LeadsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <StatusBadge stage={l.stage} />
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground truncate max-w-[150px]">
-                        {l.metaCampaignId ? `Meta ID: ${l.metaCampaignId.slice(-6)}` : l.campaignId || "Direct"}
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {l.program}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button

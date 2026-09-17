@@ -71,11 +71,13 @@ export function LeadDrawer({
 }
 
 export function LeadDetail({ lead }: { lead: any }) {
-  const { setStage, team, aiCalls, campaigns } = useStore();
+  const { setStage, team, aiCalls, campaigns, adsets, ads } = useStore();
   const caller = team.find(t => t.memberId === lead.assignedTo);
   const calls = aiCalls.filter(c => c.leadId === lead.id);
   const stageIdx = STAGES.indexOf(lead.stage);
   const campaign = campaigns.find(c => c._id === lead.campaignId || c.id === lead.campaignId || c.metaCampaignId === lead.metaCampaignId);
+  const adset = adsets.find(as => as._id === lead.metaAdSetId || as.id === lead.metaAdSetId);
+  const ad = ads.find(a => a._id === lead.metaAdId || a.id === lead.metaAdId);
 
   return (
     <div className="flex flex-col">
@@ -172,6 +174,9 @@ export function LeadDetail({ lead }: { lead: any }) {
                 ["Intake", lead.intake],
                 ["Academic status", lead.academic],
                 ["Documents", lead.documents],
+                ["Meta Campaign", campaign?.name ?? lead.metaCampaignId ?? "—"],
+                ["Meta Ad Set", adset?.name ?? lead.metaAdSetId ?? "—"],
+                ["Meta Ad", ad?.name ?? lead.metaAdId ?? "—"],
                 ["Owner", caller?.name ?? "Unassigned"],
                 ["Manager", team.find(t => t.memberId === lead.managerId)?.name ?? "—"],
                 ["Created", fmtDate(lead.createdAt)],

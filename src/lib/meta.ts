@@ -110,6 +110,8 @@ export async function processMetaLead(leadData: any) {
     email: fields['email'] || '',
     program: fields['program'] || 'Meta Ads',
     destination: fields['country'] || 'Not Specified',
+    city: fields['city'] || '',
+    neetQualified: fields['neet_qualified'] || fields['neet_qualified_status'] || '',
     source: 'Meta Ads',
     stage: 'New',
     metaCampaignId: leadData.campaign_id,

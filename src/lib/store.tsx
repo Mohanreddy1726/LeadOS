@@ -43,6 +43,8 @@ export interface Lead {
   intent: string;
   program: string;
   destination: string;
+  city?: string;
+  neetQualified?: string;
   budget: string;
   intake: string;
   academic: string;
@@ -141,12 +143,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const headers = { "Authorization": `Bearer ${token}` };
 
       try {
-        const [leadsRes, followUpsRes, notificationsRes, teamRes, campaignsRes, aiCallsRes, appsRes, activityRes] = await Promise.all([
+        const [leadsRes, followUpsRes, notificationsRes, teamRes, campaignsRes, adsetsRes, adsRes, aiCallsRes, appsRes, activityRes] = await Promise.all([
           fetch("/api/leads", { headers }),
           fetch("/api/follow-ups", { headers }),
           fetch("/api/notifications", { headers }),
           fetch("/api/team", { headers }),
           fetch("/api/campaigns", { headers }),
+          fetch("/api/adsets", { headers }),
+          fetch("/api/ads", { headers }),
           fetch("/api/ai-calls", { headers }),
           fetch("/api/applications", { headers }),
           fetch("/api/activity", { headers }),
@@ -157,6 +161,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (notificationsRes.ok) setNotifications(await notificationsRes.json());
         if (teamRes.ok) setTeam(await teamRes.json());
         if (campaignsRes.ok) setCampaigns(await campaignsRes.json());
+        if (adsetsRes.ok) setAdsets(await adsetsRes.json());
+        if (adsRes.ok) setAds(await adsRes.json());
         if (aiCallsRes.ok) setAiCalls(await aiCallsRes.json());
         if (appsRes.ok) setApplications(await appsRes.json());
         if (activityRes.ok) setActivity(await activityRes.json());
