@@ -75,7 +75,7 @@ export function LeadDetail({ lead }: { lead: any }) {
   const caller = team.find(t => t.memberId === lead.assignedTo);
   const calls = aiCalls.filter(c => c.leadId === lead.id);
   const stageIdx = STAGES.indexOf(lead.stage);
-  const campaign = campaigns.find(c => c._id === lead.campaignId || c.id === lead.campaignId);
+  const campaign = campaigns.find(c => c._id === lead.campaignId || c.id === lead.campaignId || c.metaCampaignId === lead.metaCampaignId);
 
   return (
     <div className="flex flex-col">
@@ -97,7 +97,7 @@ export function LeadDetail({ lead }: { lead: any }) {
             {lead.id} · {lead.phone} · {lead.email}
           </p>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            {lead.source} · {campaigns.find(c => c.id === lead.campaignId)?.name ?? "Unknown"}
+            {lead.source} · {campaign?.name ?? "Unknown"}
           </p>
         </div>
       </div>

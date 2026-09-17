@@ -34,6 +34,13 @@ async function fetchAllPages(url: string) {
   return allData;
 }
 
+export async function fetchMetaLeadsList() {
+  const { adAccountId, pageToken } = getConfig();
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/leads?access_token=${pageToken}&fields=id,created_time`;
+
+  return fetchAllPages(url);
+}
+
 export async function fetchMetaLeadData(leadgenId: string) {
   const { pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/${leadgenId}?access_token=${pageToken}&fields=field_data,campaign_id,adset_id,ad_id`;
@@ -109,10 +116,13 @@ export async function processMetaLead(leadData: any) {
     metaAdSetId: leadData.adset_id,
     metaAdId: leadData.ad_id,
     campaignId: leadData.campaign_id || leadData.ad_id,
-    createdAt: new Date(),
+    createdAt: new Date(leadData.created_time || Date.now()),
   };
 
-  const newLead = new Lead(mappedData);
-  await newLead.save();
-  return newLead;
+  // Use Meta Lead ID to avoid duplicates
+  return Lead.findOneAndUpdate(
+    { _id: leadData.id },
+    mappedData,
+    { upsert: true, new: true }
+  );
 }
