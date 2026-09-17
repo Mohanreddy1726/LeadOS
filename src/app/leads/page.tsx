@@ -14,7 +14,7 @@ import {
 import { LeadDrawer } from "@/components/lead-drawer";
 import { useVisibleLeads, type Lead } from "@/lib/store";
 import { Search, Filter } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, normalizePhone } from "@/lib/utils";
 
 const STAGES = [
   "New",
@@ -56,12 +56,19 @@ export default function LeadsPage() {
       return matchesSearch && matchesQuality && matchesStage;
     });
 
-    // Deduplicate by phone number to ensure no duplicates are shown in UI
-    const uniqueLeads = Array.from(
-      new Map(filtered.map(lead => [lead.phone, lead])).values()
-    );
+    // Deduplicate by normalized phone number and keep the newest entry
+    const phoneMap = new Map<string, Lead>();
+    filtered.forEach(lead => {
+      const normalized = normalizePhone(lead.phone);
+      if (!normalized) return;
 
-    return uniqueLeads.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const existing = phoneMap.get(normalized);
+      if (!existing || new Date(lead.createdAt).getTime() > new Date(existing.createdAt).getTime()) {
+        phoneMap.set(normalized, lead);
+      }
+    });
+
+    return Array.from(phoneMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [leads, search, filterQuality, filterStage]);
 
   return (

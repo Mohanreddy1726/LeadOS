@@ -30,7 +30,7 @@ import { LeadDrawer } from "@/components/lead-drawer";
 import { AssignPanel } from "@/components/assign-panel";
 import { useStore, useVisibleLeads, type Lead, type Role } from "@/lib/store";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, normalizePhone } from "@/lib/utils";
 
 const STAGES = [
   "New",
@@ -90,18 +90,18 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
   const visibleLeads = useVisibleLeads();
 
   const totals = {
-    leads: leads.length > 0 ? new Set(leads.map(l => l.phone)).size : 0,
-    qualified: leads.filter(l => l.quality !== 'junk').length,
-    junk: leads.filter(l => l.quality === 'junk').length,
+    leads: new Set(leads.map(l => normalizePhone(l.phone))).size,
+    qualified: new Set(leads.filter(l => l.quality !== 'junk').map(l => normalizePhone(l.phone))).size,
+    junk: new Set(leads.filter(l => l.quality === 'junk').map(l => normalizePhone(l.phone))).size,
     aiCalls: leads.length, // approximation
-    conversions: leads.filter(l => l.stage === 'Converted').length,
-    newLeads: leads.filter(l => l.stage === 'New').length,
-    aiSuccess: leads.filter(l => l.quality !== 'junk').length,
-    followUps: leads.filter(l => l.stage === 'Contacted').length,
-    applications: leads.filter(l => l.stage === 'Application').length,
-    metaLeads: new Set(leads.filter(l => (l.source || '').toLowerCase().includes('meta') || l.metaCampaignId).map(l => l.phone)).size,
-    googleLeads: new Set(leads.filter(l => (l.source || '').toLowerCase().includes('google')).map(l => l.phone)).size,
-    websiteLeads: new Set(leads.filter(l => (l.source || '').toLowerCase().includes('website') || (!l.source && !l.metaCampaignId)).map(l => l.phone)).size,
+    conversions: new Set(leads.filter(l => l.stage === 'Converted').map(l => normalizePhone(l.phone))).size,
+    newLeads: new Set(leads.filter(l => l.stage === 'New').map(l => normalizePhone(l.phone))).size,
+    aiSuccess: new Set(leads.filter(l => l.quality !== 'junk').map(l => normalizePhone(l.phone))).size,
+    followUps: new Set(leads.filter(l => l.stage === 'Contacted').map(l => normalizePhone(l.phone))).size,
+    applications: new Set(leads.filter(l => l.stage === 'Application').map(l => normalizePhone(l.phone))).size,
+    metaLeads: new Set(leads.filter(l => (l.source || '').toLowerCase().includes('meta') || l.metaCampaignId).map(l => normalizePhone(l.phone))).size,
+    googleLeads: new Set(leads.filter(l => (l.source || '').toLowerCase().includes('google')).map(l => normalizePhone(l.phone))).size,
+    websiteLeads: new Set(leads.filter(l => (l.source || '').toLowerCase().includes('website') || (!l.source && !l.metaCampaignId)).map(l => normalizePhone(l.phone))).size,
   };
 
   const qualitySplit = [
