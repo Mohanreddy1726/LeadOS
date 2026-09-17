@@ -41,19 +41,22 @@ async function fetchAllPages(url: string) {
   return allData;
 }
 
-export async function fetchPageId() {
+export async function fetchPageDetails() {
   const { pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/me/accounts?access_token=${pageToken}`;
-  await logMetaSync(`Fetching Page ID from: ${url}`);
+  await logMetaSync(`Fetching Page details from: ${url}`);
   const response = await fetch(url);
   if (!response.ok) {
     const errText = await response.text();
-    await logMetaSync(`Failed to fetch Page ID. Status: ${response.status}, Body: ${errText}`, 'ERROR');
-    throw new Error(`Failed to fetch Page ID: ${response.statusText}`);
+    await logMetaSync(`Failed to fetch Page details. Status: ${response.status}, Body: ${errText}`, 'ERROR');
+    throw new Error(`Failed to fetch Page details: ${response.statusText}`);
   }
   const result = await response.json();
   if (result.data && result.data.length > 0) {
-    return result.data[0].id;
+    return {
+      id: result.data[0].id,
+      accessToken: result.data[0].access_token
+    };
   }
   throw new Error('No associated Facebook Page found for this token.');
 }
