@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Name and Phone are required' }, { status: 400 });
     }
 
-    // Create the lead in MongoDB
-    const newLead = new Lead({
+    // Use findOneAndUpdate to club leads with the same phone number
+    const leadData = {
       name,
       phone,
       email: data.email || '',
@@ -49,10 +49,14 @@ export async function POST(req: NextRequest) {
       source: `Website: ${formId}`,
       stage: 'New',
       createdAt: new Date(),
-    });
+    };
 
-    await newLead.save();
-    console.log('Database Result: Lead saved successfully', newLead._id);
+    const newLead = await Lead.findOneAndUpdate(
+      { phone },
+      leadData,
+      { upsert: true, new: true }
+    );
+    console.log('Database Result: Lead processed successfully', newLead._id);
 
     return NextResponse.json({
       message: 'Lead ingested successfully',
