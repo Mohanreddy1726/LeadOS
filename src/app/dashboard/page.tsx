@@ -259,11 +259,11 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {campaigns.map((c) => {
+              {campaigns.map((c, index) => {
                 const campaignLeads = leads.filter(l => l.campaignId === c.id).length;
                 const qualifiedLeads = leads.filter(l => l.campaignId === c.id && l.quality !== 'junk').length;
                 return (
-                  <tr key={c.id} className="transition-colors hover:bg-foreground/[0.03]">
+                  <tr key={c.id || c._id || index} className="transition-colors hover:bg-foreground/[0.03]">
                   <td className="px-3 py-2.5 font-medium">{c.name}</td>
                   <td className="px-3 py-2.5 text-muted-foreground">{c.platform}</td>
                   <td className="font-mono px-3 py-2.5">{inr(c.spend)}</td>
