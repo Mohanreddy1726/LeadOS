@@ -36,7 +36,7 @@ async function fetchAllPages(url: string) {
 
 export async function fetchMetaLeadData(leadgenId: string) {
   const { pageToken } = getConfig();
-  const url = `https://graph.facebook.com/v19.0/${leadgenId}?access_token=${pageToken}&fields=field_data`;
+  const url = `https://graph.facebook.com/v19.0/${leadgenId}?access_token=${pageToken}&fields=field_data,campaign_id,adset_id,ad_id`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Meta API error: ${response.statusText}`);
@@ -105,6 +105,10 @@ export async function processMetaLead(leadData: any) {
     destination: fields['country'] || 'Not Specified',
     source: 'Meta Ads',
     stage: 'New',
+    metaCampaignId: leadData.campaign_id,
+    metaAdSetId: leadData.adset_id,
+    metaAdId: leadData.ad_id,
+    campaignId: leadData.campaign_id || leadData.ad_id,
     createdAt: new Date(),
   };
 

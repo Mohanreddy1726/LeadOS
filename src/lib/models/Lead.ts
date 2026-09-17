@@ -14,6 +14,9 @@ export interface ILead extends Document {
   assignedTo?: string;
   managerId?: string;
   campaignId?: string;
+  metaCampaignId?: string;
+  metaAdSetId?: string;
+  metaAdId?: string;
   aiSummary?: string;
   createdAt: Date;
 }
@@ -40,6 +43,9 @@ const LeadSchema = new Schema<ILead>({
   assignedTo: { type: String },
   managerId: { type: String },
   campaignId: { type: String },
+  metaCampaignId: { type: String },
+  metaAdSetId: { type: String },
+  metaAdId: { type: String },
   aiSummary: { type: String },
   createdAt: { type: Date, default: Date.now },
 });

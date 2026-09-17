@@ -133,11 +133,11 @@ export default function CampaignsPage() {
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Platform</th>
-                  <th className="px-4 py-3 font-medium">Reach</th>
-                  <th className="px-4 py-3 font-medium">Spend</th>
-                  <th className="px-4 py-3 font-medium">CPC</th>
                   <th className="px-4 py-3 font-medium">Leads</th>
                   <th className="px-4 py-3 font-medium">CPL</th>
+                  <th className="px-4 py-3 font-medium">Spend</th>
+                  <th className="px-4 py-3 font-medium">Reach</th>
+                  <th className="px-4 py-3 font-medium">CPC</th>
                   <th className="px-4 py-3 font-medium">Qualified</th>
                   <th className="px-4 py-3 font-medium">CPQL</th>
                   <th className="px-4 py-3 font-medium">Conv.</th>
@@ -146,7 +146,14 @@ export default function CampaignsPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {currentData.map((c) => {
-                  const campaignLeads = leads.filter(l => l.campaignId === c.metaCampaignId || l.campaignId === c._id || l.campaignId === c.id || l.campaignId === c.metaAdSetId || l.campaignId === c.metaAdId);
+                  const campaignLeads = leads.filter(l =>
+                    l.metaCampaignId === c.metaCampaignId ||
+                    l.metaAdSetId === c.metaAdSetId ||
+                    l.metaAdId === c.metaAdId ||
+                    l.campaignId === c.metaCampaignId ||
+                    l.campaignId === c._id ||
+                    l.campaignId === c.id
+                  );
                   const qualified = campaignLeads.filter(l => l.stage === "Qualified").length;
                   const conversions = campaignLeads.filter(l => l.stage === "Converted").length;
                   const leadCount = campaignLeads.length;
@@ -160,11 +167,11 @@ export default function CampaignsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">{c.platform}</td>
-                      <td className="px-4 py-3 font-mono">{ (c.reach || 0).toLocaleString("en-IN") }</td>
-                      <td className="px-4 py-3 font-mono">{inr(c.spend || 0)}</td>
-                      <td className="px-4 py-3 font-mono">{cpc > 0 ? inr(cpc) : "—"}</td>
                       <td className="px-4 py-3 font-mono">{leadCount.toLocaleString("en-IN")}</td>
                       <td className="px-4 py-3 font-mono">{leadCount > 0 ? inr(Math.round((c.spend || 0) / leadCount)) : "—"}</td>
+                      <td className="px-4 py-3 font-mono">{inr(c.spend || 0)}</td>
+                      <td className="px-4 py-3 font-mono">{ (c.reach || 0).toLocaleString("en-IN") }</td>
+                      <td className="px-4 py-3 font-mono">{cpc > 0 ? inr(cpc) : "—"}</td>
                       <td className="px-4 py-3 font-mono">{qualified.toLocaleString("en-IN")}</td>
                       <td className="px-4 py-3 font-mono">{qualified > 0 ? inr(Math.round((c.spend || 0) / qualified)) : "—"}</td>
                       <td className="px-4 py-3 font-mono">{conversions}</td>
