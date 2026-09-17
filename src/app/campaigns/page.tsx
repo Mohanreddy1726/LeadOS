@@ -26,7 +26,7 @@ export default function CampaignsPage() {
   }, [view, campaigns, adsets, ads]);
 
   const totalSpend = campaigns.reduce((s, c) => s + (c.spend || 0), 0);
-  const totalLeads = leads.length;
+  const totalLeads = campaigns.reduce((s, c) => s + (c.conversions || 0), 0);
   const totalConverted = leads.filter(l => l.stage === "Converted").length;
   const avgCpl = totalLeads > 0 ? totalSpend / totalLeads : 0;
 
