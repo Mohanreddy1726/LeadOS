@@ -57,7 +57,7 @@ export async function syncAdPerformance() {
 
 export async function fetchMetaCampaignStatus() {
   const { adAccountId, pageToken } = getConfig();
-  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns?fields=id,status&access_token=${pageToken}`;
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns?fields=id,status,name&access_token=${pageToken}`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Meta Campaigns API error: ${response.statusText}`);
@@ -67,7 +67,7 @@ export async function fetchMetaCampaignStatus() {
 
 export async function fetchMetaAdSetStatus() {
   const { adAccountId, pageToken } = getConfig();
-  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/adsets?fields=id,status&access_token=${pageToken}`;
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/adsets?fields=id,status,name&access_token=${pageToken}`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Meta AdSet API error: ${response.statusText}`);
@@ -77,7 +77,7 @@ export async function fetchMetaAdSetStatus() {
 
 export async function fetchMetaAdStatus() {
   const { adAccountId, pageToken } = getConfig();
-  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/ads?fields=id,status&access_token=${pageToken}`;
+  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/ads?fields=id,status,name&access_token=${pageToken}`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Meta Ad API error: ${response.statusText}`);
