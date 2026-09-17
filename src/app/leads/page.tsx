@@ -68,7 +68,11 @@ export default function LeadsPage() {
       }
     });
 
-    return Array.from(phoneMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return Array.from(phoneMap.values()).sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
   }, [leads, search, filterQuality, filterStage]);
 
   return (
