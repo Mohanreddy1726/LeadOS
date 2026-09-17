@@ -99,7 +99,7 @@ export function LeadDetail({ lead }: { lead: any }) {
             {lead.id} · {lead.phone} · {lead.email}
           </p>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            {lead.source} · {campaign?.name ?? "Unknown"}
+            {lead.source} · {lead.source?.toLowerCase().includes('website') ? "Direct Inquiry" : (campaign?.name ?? "Unknown")}
           </p>
         </div>
       </div>

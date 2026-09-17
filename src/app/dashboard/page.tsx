@@ -90,7 +90,7 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
   const visibleLeads = useVisibleLeads();
 
   const totals = {
-    leads: leads.length,
+    leads: leads.length > 0 ? new Set(leads.map(l => l.phone)).size : 0,
     qualified: leads.filter(l => l.quality !== 'junk').length,
     junk: leads.filter(l => l.quality === 'junk').length,
     aiCalls: leads.length, // approximation
@@ -99,9 +99,9 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
     aiSuccess: leads.filter(l => l.quality !== 'junk').length,
     followUps: leads.filter(l => l.stage === 'Contacted').length,
     applications: leads.filter(l => l.stage === 'Application').length,
-    metaLeads: leads.filter(l => (l.source || '').toLowerCase().includes('meta') || l.metaCampaignId).length,
-    googleLeads: leads.filter(l => (l.source || '').toLowerCase().includes('google')).length,
-    websiteLeads: leads.filter(l => (l.source || '').toLowerCase().includes('website') || (!l.source && !l.metaCampaignId)).length,
+    metaLeads: new Set(leads.filter(l => (l.source || '').toLowerCase().includes('meta') || l.metaCampaignId).map(l => l.phone)).size,
+    googleLeads: new Set(leads.filter(l => (l.source || '').toLowerCase().includes('google')).map(l => l.phone)).size,
+    websiteLeads: new Set(leads.filter(l => (l.source || '').toLowerCase().includes('website') || (!l.source && !l.metaCampaignId)).map(l => l.phone)).size,
   };
 
   const qualitySplit = [

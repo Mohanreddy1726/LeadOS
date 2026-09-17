@@ -42,7 +42,8 @@ export default function LeadsPage() {
 
   const filteredLeads = useMemo(() => {
     if (!leads) return [];
-    const result = leads.filter((l) => {
+
+    const filtered = leads.filter((l) => {
       const name = l.name || "";
       const phone = l.phone || "";
       const matchesSearch =
@@ -55,7 +56,12 @@ export default function LeadsPage() {
       return matchesSearch && matchesQuality && matchesStage;
     });
 
-    return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // Deduplicate by phone number to ensure no duplicates are shown in UI
+    const uniqueLeads = Array.from(
+      new Map(filtered.map(lead => [lead.phone, lead])).values()
+    );
+
+    return uniqueLeads.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [leads, search, filterQuality, filterStage]);
 
   return (
