@@ -136,7 +136,7 @@ export default function CampaignsPage() {
                   <th className="px-4 py-3 font-medium">Leads</th>
                   <th className="px-4 py-3 font-medium">CPL</th>
                   <th className="px-4 py-3 font-medium">Spend</th>
-                  <th className="px-4 py-3 font-medium">Reach</th>
+                  <th className="px-4 py-3 font-medium">Views</th>
                   <th className="px-4 py-3 font-medium">CPC</th>
                   <th className="px-4 py-3 font-medium">Qualified</th>
                   <th className="px-4 py-3 font-medium">CPQL</th>
@@ -172,7 +172,7 @@ export default function CampaignsPage() {
                       <td className="px-4 py-3 font-mono">{leadCount.toLocaleString("en-IN")}</td>
                       <td className="px-4 py-3 font-mono">{leadCount > 0 ? inr(Math.round((c.spend || 0) / leadCount)) : "—"}</td>
                       <td className="px-4 py-3 font-mono">{inr(c.spend || 0)}</td>
-                      <td className="px-4 py-3 font-mono">{ (c.reach || 0).toLocaleString("en-IN") }</td>
+                      <td className="px-4 py-3 font-mono">{ (c.impressions || 0).toLocaleString("en-IN") }</td>
                       <td className="px-4 py-3 font-mono">{cpc > 0 ? inr(cpc) : "—"}</td>
                       <td className="px-4 py-3 font-mono">{qualified.toLocaleString("en-IN")}</td>
                       <td className="px-4 py-3 font-mono">{qualified > 0 ? inr(Math.round((c.spend || 0) / qualified)) : "—"}</td>
