@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { syncCampaignPerformance, syncAdSetPerformance, syncAdPerformance, fetchMetaCampaignStatus, fetchMetaAdSetStatus, fetchMetaAdStatus, syncMetaLeads } from '@/lib/meta';
+import { logMetaSync } from '@/lib/logger';
 import dbConnect from '@/lib/db';
 import Campaign from '@/lib/models/Campaign';
 import AdSet from '@/lib/models/AdSet';
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     await dbConnect();
 
-    console.log('--- Meta Full Sync Started ---');
+    logMetaSync('--- Meta Full Sync Started ---');
 
     // Fetch all performance and status data in parallel
     const [
@@ -134,12 +135,12 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Sync Leads
-    console.log('Syncing leads...');
+    logMetaSync('Syncing leads...');
     let leadsSynced = 0;
     try {
       leadsSynced = await syncMetaLeads();
     } catch (leadErr) {
-      console.error('Lead sync failed, but continuing with success response for assets:', leadErr);
+      logMetaSync(`Lead sync failed, but continuing with success response for assets: ${leadErr}`, 'ERROR');
       // We don't throw here because campaigns/ads were already synced successfully
     }
 

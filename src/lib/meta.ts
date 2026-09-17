@@ -1,5 +1,6 @@
 import Lead from './models/Lead';
 import dbConnect from './db';
+import { logMetaSync } from './logger';
 
 interface MetaConfig {
   appId: string;
@@ -20,9 +21,15 @@ async function fetchAllPages(url: string) {
   let nextUrl = url;
 
   while (nextUrl) {
+    logMetaSync(`Fetching Meta API: ${nextUrl}`);
     const response = await fetch(nextUrl);
-    if (!response.ok) throw new Error(`Meta API error: ${response.statusText}`);
+    if (!response.ok) {
+      const errText = await response.text();
+      logMetaSync(`Meta API Error Response: ${errText}`, 'ERROR');
+      throw new Error(`Meta API error: ${response.statusText} - ${errText}`);
+    }
     const result = await response.json();
+    logMetaSync(`Received ${result.data?.length || 0} items from page.`);
 
     if (result.data && Array.isArray(result.data)) {
       allData.push(...result.data);
@@ -34,14 +41,31 @@ async function fetchAllPages(url: string) {
   return allData;
 }
 
+export async function fetchPageId() {
+  const { pageToken } = getConfig();
+  const url = `https://graph.facebook.com/v19.0/me/accounts?access_token=${pageToken}`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Failed to fetch Page ID: ${response.statusText}`);
+  const result = await response.json();
+  if (result.data && result.data.length > 0) {
+    return result.data[0].id;
+  }
+  throw new Error('No associated Facebook Page found for this token.');
+}
+
 export async function fetchMetaLeadsList() {
   const { adAccountId, pageToken } = getConfig();
-  // Updated URL to use the Page ID instead of Ad Account ID if possible,
-  // but since we have adAccountId, we use the act_{id}/leads endpoint.
-  // Adding 'limit=100' to ensure we get a good batch.
-  const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
 
-  return fetchAllPages(url);
+  try {
+    const pageId = await fetchPageId();
+    logMetaSync(`Using Page ID ${pageId} for lead retrieval.`);
+    const url = `https://graph.facebook.com/v19.0/${pageId}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
+    return await fetchAllPages(url);
+  } catch (err) {
+    logMetaSync(`Page-level lead retrieval failed or no Page ID found, falling back to Ad Account. Error: ${err}`, 'WARN');
+    const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
+    return await fetchAllPages(url);
+  }
 }
 
 export async function fetchMetaLeadData(leadgenId: string) {
@@ -99,7 +123,7 @@ export async function fetchMetaAdStatus() {
 export async function syncMetaLeads() {
   try {
     const leadsList = await fetchMetaLeadsList();
-    console.log(`Found ${leadsList.length} leads to sync from Meta...`);
+    logMetaSync(`Found ${leadsList.length} leads to sync from Meta...`);
 
     let processedCount = 0;
     for (const lead of leadsList) {
@@ -108,14 +132,14 @@ export async function syncMetaLeads() {
         await processMetaLead(leadData);
         processedCount++;
       } catch (err) {
-        console.error(`Failed to sync lead ${lead.id}:`, err);
+        logMetaSync(`Failed to sync lead ${lead.id}: ${err}`, 'ERROR');
       }
     }
 
-    console.log(`Successfully synced ${processedCount} leads.`);
+    logMetaSync(`Successfully synced ${processedCount} leads.`);
     return processedCount;
   } catch (err) {
-    console.error('Meta Lead Sync Error:', err);
+    logMetaSync(`Meta Lead Sync Error: ${err}`, 'ERROR');
     throw err;
   }
 }
