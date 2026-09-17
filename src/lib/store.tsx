@@ -412,6 +412,8 @@ export function useStore() {
 export function useVisibleLeads() {
   const { leads, user } = useStore();
   return useMemo(() => {
+    console.log("useVisibleLeads - user:", user);
+    console.log("useVisibleLeads - leads count:", leads?.length);
     if (!user) return leads;
     if (user.role === "telecaller") return leads.filter((l) => l.assignedTo === user.memberId);
     if (user.role === "manager")

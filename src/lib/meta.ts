@@ -93,6 +93,30 @@ export async function fetchMetaAdStatus() {
   return fetchAllPages(url);
 }
 
+export async function syncMetaLeads() {
+  try {
+    const leadsList = await fetchMetaLeadsList();
+    console.log(`Found ${leadsList.length} leads to sync from Meta...`);
+
+    let processedCount = 0;
+    for (const lead of leadsList) {
+      try {
+        const leadData = await fetchMetaLeadData(lead.id);
+        await processMetaLead(leadData);
+        processedCount++;
+      } catch (err) {
+        console.error(`Failed to sync lead ${lead.id}:`, err);
+      }
+    }
+
+    console.log(`Successfully synced ${processedCount} leads.`);
+    return processedCount;
+  } catch (err) {
+    console.error('Meta Lead Sync Error:', err);
+    throw err;
+  }
+}
+
 export async function processMetaLead(leadData: any) {
   await dbConnect();
 

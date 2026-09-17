@@ -41,10 +41,13 @@ export default function LeadsPage() {
   const [active, setActive] = useState<Lead | null>(null);
 
   const filteredLeads = useMemo(() => {
+    if (!leads) return [];
     return leads.filter((l) => {
+      const name = l.name || "";
+      const phone = l.phone || "";
       const matchesSearch =
-        l.name.toLowerCase().includes(search.toLowerCase()) ||
-        l.phone.toLowerCase().includes(search.toLowerCase());
+        name.toLowerCase().includes(search.toLowerCase()) ||
+        phone.toLowerCase().includes(search.toLowerCase());
       const matchesQuality =
         filterQuality === "all" || l.quality === filterQuality;
       const matchesStage =
@@ -133,7 +136,9 @@ export default function LeadsPage() {
                       onClick={() => setActive(l)}
                     >
                       <td className="px-4 py-3 text-muted-foreground font-mono text-[10px]">
-                        {new Date(l.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                        {l.createdAt
+                          ? new Date(l.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+                          : "—"}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">

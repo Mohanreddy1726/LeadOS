@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { syncCampaignPerformance, syncAdSetPerformance, syncAdPerformance, fetchMetaCampaignStatus, fetchMetaAdSetStatus, fetchMetaAdStatus } from '@/lib/meta';
+import { syncCampaignPerformance, syncAdSetPerformance, syncAdPerformance, fetchMetaCampaignStatus, fetchMetaAdSetStatus, fetchMetaAdStatus, syncMetaLeads } from '@/lib/meta';
 import dbConnect from '@/lib/db';
 import Campaign from '@/lib/models/Campaign';
 import AdSet from '@/lib/models/AdSet';
@@ -133,11 +133,16 @@ export async function GET(req: NextRequest) {
       Ad.updateMany({ platform: 'Meta', metaAdId: { $nin: Array.from(seenAdIds) } }, { status: 'DELETED' }),
     ]);
 
+    // Sync Leads
+    console.log('Syncing leads...');
+    const leadsSynced = await syncMetaLeads();
+
     return NextResponse.json({
-      message: 'All Meta assets synced successfully',
+      message: 'All Meta assets and leads synced successfully',
       campaigns: campaignsData.length,
       adsets: adSetsData.length,
       ads: adsData.length,
+      leads: leadsSynced,
     }, { status: 200 });
 
   } catch (err: any) {
