@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { Panel, PanelHead, KpiCard } from "@/components/bits";
 import { useStore } from "@/lib/store";
@@ -11,7 +10,6 @@ const inr = (val: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
 
 export default function CampaignsPage() {
-  const router = useRouter();
   const { campaigns, adsets, ads, leads, setCampaigns, setAdsets, setAds } = useStore();
   const [view, setView] = useState<"campaigns" | "adsets" | "ads">("campaigns");
   const [syncing, setSyncing] = useState(false);

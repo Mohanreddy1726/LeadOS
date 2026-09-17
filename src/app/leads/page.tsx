@@ -117,6 +117,7 @@ export default function LeadsPage() {
                     <th className="px-4 py-3 font-medium">Score</th>
                     <th className="px-4 py-3 font-medium">Quality</th>
                     <th className="px-4 py-3 font-medium">Stage</th>
+                    <th className="px-4 py-3 font-medium">Campaign</th>
                     <th className="px-4 py-3 font-medium">Program</th>
                     <th className="px-4 py-3 font-medium text-right">Action</th>
                   </tr>
@@ -149,6 +150,9 @@ export default function LeadsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <StatusBadge stage={l.stage} />
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground truncate max-w-[150px]">
+                        {l.metaCampaignId ? `Meta ID: ${l.metaCampaignId.slice(-6)}` : l.campaignId || "Direct"}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {l.program}
