@@ -30,6 +30,7 @@ import { LeadDrawer } from "@/components/lead-drawer";
 import { AssignPanel } from "@/components/assign-panel";
 import { useStore, useVisibleLeads, type Lead, type Role } from "@/lib/store";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const STAGES = [
   "New",
@@ -98,9 +99,9 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
     aiSuccess: leads.filter(l => l.quality !== 'junk').length,
     followUps: leads.filter(l => l.stage === 'Contacted').length,
     applications: leads.filter(l => l.stage === 'Application').length,
-    metaLeads: leads.filter(l => l.source?.toLowerCase().includes('meta') || l.metaCampaignId).length,
-    googleLeads: leads.filter(l => l.source?.toLowerCase().includes('google')).length,
-    websiteLeads: leads.filter(l => l.source?.toLowerCase().includes('website')).length,
+    metaLeads: leads.filter(l => (l.source || '').toLowerCase().includes('meta') || l.metaCampaignId).length,
+    googleLeads: leads.filter(l => (l.source || '').toLowerCase().includes('google')).length,
+    websiteLeads: leads.filter(l => (l.source || '').toLowerCase().includes('website') || (!l.source && !l.metaCampaignId)).length,
   };
 
   const qualitySplit = [
@@ -112,9 +113,9 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
   ];
 
   const sourceSplit = [
-    { label: 'Meta', value: leads.filter(l => l.campaignId?.toLowerCase().includes('meta') || l.metaCampaignId).length, color: 'var(--color-primary)' },
-    { label: 'Google', value: leads.filter(l => l.campaignId?.toLowerCase().includes('google')).length, color: 'var(--color-high)' },
-    { label: 'WhatsApp', value: leads.filter(l => l.campaignId?.toLowerCase().includes('wa')).length, color: 'var(--color-med)' },
+    { label: 'Meta', value: totals.metaLeads, color: 'var(--color-primary)' },
+    { label: 'Google', value: totals.googleLeads, color: 'var(--color-high)' },
+    { label: 'Website', value: totals.websiteLeads, color: 'var(--color-med)' },
   ];
 
   const funnel = [
@@ -492,7 +493,18 @@ function RecentLeads({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) => vo
                     tone={l.quality === "junk" ? "junk" : l.quality === "hot" ? "hot" : "med"}
                   />
                   <span className="min-w-0">
-                    <span className="block truncate text-[12px] font-medium">{l.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="block truncate text-[12px] font-medium">{l.name}</span>
+                      <span className={cn(
+                        "text-[9px] px-1.5 py-0.5 rounded-full border font-medium",
+                        (l.source || (l.metaLeadId ? 'Meta Ads' : 'Website')).toLowerCase().includes('meta') ? "bg-blue-50 text-blue-600 border-blue-100" :
+                        (l.source || (l.metaLeadId ? 'Meta Ads' : 'Website')).toLowerCase().includes('google') ? "bg-green-50 text-green-600 border-green-100" :
+                        (l.source || (l.metaLeadId ? 'Meta Ads' : 'Website')).toLowerCase().includes('website') ? "bg-purple-50 text-purple-600 border-purple-100" :
+                        "bg-gray-50 text-gray-600 border-gray-100"
+                      )}>
+                        {(l.source || (l.metaLeadId ? 'Meta Ads' : 'Website'))}
+                      </span>
+                    </div>
                     <span className="font-mono block truncate text-[10px] text-faint">
                       {l.phone}
                     </span>

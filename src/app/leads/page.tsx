@@ -165,15 +165,23 @@ export default function LeadsPage() {
                         {l.phone}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={cn(
-                          "text-[11px] font-medium px-2 py-0.5 rounded-full border",
-                          l.source?.toLowerCase().includes('meta') ? "bg-blue-50 text-blue-600 border-blue-100" :
-                          l.source?.toLowerCase().includes('google') ? "bg-green-50 text-green-600 border-green-100" :
-                          l.source?.toLowerCase().includes('website') ? "bg-purple-50 text-purple-600 border-purple-100" :
-                          "bg-gray-50 text-gray-600 border-gray-100"
-                        )}>
-                          {l.source || "—"}
-                        </span>
+                        {(() => {
+                          let source = l.source;
+                          if (!source) {
+                            source = l.metaLeadId ? 'Meta Ads' : 'Website';
+                          }
+                          return (
+                            <span className={cn(
+                              "text-[11px] font-medium px-2 py-0.5 rounded-full border",
+                              source.toLowerCase().includes('meta') ? "bg-blue-50 text-blue-600 border-blue-100" :
+                              source.toLowerCase().includes('google') ? "bg-green-50 text-green-600 border-green-100" :
+                              source.toLowerCase().includes('website') ? "bg-purple-50 text-purple-600 border-purple-100" :
+                              "bg-gray-50 text-gray-600 border-gray-100"
+                            )}>
+                              {source}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground truncate max-w-[120px]">
                         {l.destination || "—"}
