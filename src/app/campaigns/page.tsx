@@ -16,11 +16,13 @@ export default function CampaignsPage() {
 
   const currentData = useMemo(() => {
     const data = view === "campaigns" ? campaigns : view === "adsets" ? adsets : ads;
-    return [...data].sort((a, b) => {
-      if (a.status === 'ACTIVE' && b.status !== 'ACTIVE') return -1;
-      if (a.status !== 'ACTIVE' && b.status === 'ACTIVE') return 1;
-      return 0;
-    });
+    return [...data]
+      .filter(item => item.status !== 'DELETED')
+      .sort((a, b) => {
+        if (a.status === 'ACTIVE' && b.status !== 'ACTIVE') return -1;
+        if (a.status !== 'ACTIVE' && b.status === 'ACTIVE') return 1;
+        return 0;
+      });
   }, [view, campaigns, adsets, ads]);
 
   const totalSpend = campaigns.reduce((s, c) => s + (c.spend || 0), 0);

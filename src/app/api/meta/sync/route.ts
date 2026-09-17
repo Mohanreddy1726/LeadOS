@@ -39,7 +39,9 @@ export async function GET(req: NextRequest) {
     adStatData.forEach((s: any) => adStatusMap.set(s.id, s.status));
 
     // Sync Campaigns
+    const seenCampaignIds = new Set();
     await Promise.all(campaignsData.map(async (item: any) => {
+      seenCampaignIds.add(item.campaign_id);
       return Campaign.findOneAndUpdate(
         { metaCampaignId: item.campaign_id, platform: 'Meta' },
         {
@@ -57,14 +59,22 @@ export async function GET(req: NextRequest) {
     }));
 
     // Sync AdSets
+    const seenAdSetIds = new Set();
     await Promise.all(adSetsData.map(async (item: any) => {
+      seenAdSetIds.add(item.adset_id);
+      const campaignStatus = campaignStatusMap.get(item.campaign_id);
+      // Effective status: Active only if both AdSet and Campaign are Active
+      const effectiveStatus = (campaignStatus === 'ACTIVE' && adSetStatusMap.get(item.adset_id) === 'ACTIVE')
+        ? 'ACTIVE'
+        : (adSetStatusMap.get(item.adset_id) || 'INACTIVE');
+
       return AdSet.findOneAndUpdate(
         { metaAdSetId: item.adset_id, platform: 'Meta' },
         {
           metaAdSetId: item.adset_id,
           name: item.adset_name,
           campaignId: item.campaign_id,
-          status: adSetStatusMap.get(item.adset_id),
+          status: effectiveStatus,
           spend: parseFloat(item.spend || '0'),
           impressions: parseInt(item.impressions || '0', 10),
           clicks: parseInt(item.clicks || '0', 10),
@@ -76,7 +86,16 @@ export async function GET(req: NextRequest) {
     }));
 
     // Sync Ads
+    const seenAdIds = new Set();
     await Promise.all(adsData.map(async (item: any) => {
+      seenAdIds.add(item.ad_id);
+      const campaignStatus = campaignStatusMap.get(item.campaign_id);
+      const adSetStatus = adSetStatusMap.get(item.adset_id);
+      // Effective status: Active only if Campaign, AdSet, and Ad are all Active
+      const effectiveStatus = (campaignStatus === 'ACTIVE' && adSetStatus === 'ACTIVE' && adStatusMap.get(item.ad_id) === 'ACTIVE')
+        ? 'ACTIVE'
+        : (adStatusMap.get(item.ad_id) || 'INACTIVE');
+
       return Ad.findOneAndUpdate(
         { metaAdId: item.ad_id, platform: 'Meta' },
         {
@@ -84,7 +103,7 @@ export async function GET(req: NextRequest) {
           name: item.ad_name,
           adSetId: item.adset_id,
           campaignId: item.campaign_id,
-          status: adStatusMap.get(item.ad_id),
+          status: effectiveStatus,
           spend: parseFloat(item.spend || '0'),
           impressions: parseInt(item.impressions || '0', 10),
           clicks: parseInt(item.clicks || '0', 10),
@@ -94,6 +113,13 @@ export async function GET(req: NextRequest) {
         { upsert: true, new: true }
       );
     }));
+
+    // Cleanup: Mark missing assets as DELETED
+    await Promise.all([
+      Campaign.updateMany({ platform: 'Meta', metaCampaignId: { $nin: Array.from(seenCampaignIds) } }, { status: 'DELETED' }),
+      AdSet.updateMany({ platform: 'Meta', metaAdSetId: { $nin: Array.from(seenAdSetIds) } }, { status: 'DELETED' }),
+      Ad.updateMany({ platform: 'Meta', metaAdId: { $nin: Array.from(seenAdIds) } }, { status: 'DELETED' }),
+    ]);
 
     return NextResponse.json({
       message: 'All Meta assets synced successfully',
