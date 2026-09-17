@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
 
     // Fetch all performance and status data in parallel
     const [
-      campaignPerf, adSetPerf, adPerf,
-      campaignStat, adSetStat, adStat
+      campaignsData, adSetsData, adsData,
+      campaignStatData, adSetStatData, adStatData
     ] = await Promise.all([
       syncCampaignPerformance(),
       syncAdSetPerformance(),
@@ -29,18 +29,14 @@ export async function GET(req: NextRequest) {
       fetchMetaAdStatus(),
     ]);
 
-    const campaignsData = campaignPerf.data || [];
-    const adSetsData = adSetPerf.data || [];
-    const adsData = adPerf.data || [];
-
     const campaignStatusMap = new Map();
-    (campaignStat.data || []).forEach((s: any) => campaignStatusMap.set(s.id, s.status));
+    campaignStatData.forEach((s: any) => campaignStatusMap.set(s.id, s.status));
 
     const adSetStatusMap = new Map();
-    (adSetStat.data || []).forEach((s: any) => adSetStatusMap.set(s.id, s.status));
+    adSetStatData.forEach((s: any) => adSetStatusMap.set(s.id, s.status));
 
     const adStatusMap = new Map();
-    (adStat.data || []).forEach((s: any) => adStatusMap.set(s.id, s.status));
+    adStatData.forEach((s: any) => adStatusMap.set(s.id, s.status));
 
     // Sync Campaigns
     await Promise.all(campaignsData.map(async (item: any) => {

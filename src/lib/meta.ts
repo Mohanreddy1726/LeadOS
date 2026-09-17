@@ -15,6 +15,25 @@ const getConfig = (): MetaConfig => ({
   pageToken: process.env.META_PAGE_ACCESS_TOKEN || '',
 });
 
+async function fetchAllPages(url: string) {
+  let allData: any[] = [];
+  let nextUrl = url;
+
+  while (nextUrl) {
+    const response = await fetch(nextUrl);
+    if (!response.ok) throw new Error(`Meta API error: ${response.statusText}`);
+    const result = await response.json();
+
+    if (result.data && Array.isArray(result.data)) {
+      allData.push(...result.data);
+    }
+
+    nextUrl = result.paging?.next || null;
+  }
+
+  return allData;
+}
+
 export async function fetchMetaLeadData(leadgenId: string) {
   const { pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/${leadgenId}?access_token=${pageToken}&fields=field_data`;
@@ -29,60 +48,42 @@ export async function syncCampaignPerformance() {
   const { adAccountId, pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,conversions,reach&level=campaign&date_preset=maximum&access_token=${pageToken}`;
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Meta Insights API error: ${response.statusText}`);
-
-  return response.json();
+  return fetchAllPages(url);
 }
 
 export async function syncAdSetPerformance() {
   const { adAccountId, pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=adset_id,adset_name,campaign_id,spend,impressions,clicks,conversions,reach&level=adset&date_preset=maximum&access_token=${pageToken}`;
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Meta Insights API error: ${response.statusText}`);
-
-  return response.json();
+  return fetchAllPages(url);
 }
 
 export async function syncAdPerformance() {
   const { adAccountId, pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?fields=ad_id,ad_name,adset_id,campaign_id,spend,impressions,clicks,conversions,reach&level=ad&date_preset=maximum&access_token=${pageToken}`;
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Meta Insights API error: ${response.statusText}`);
-
-  return response.json();
+  return fetchAllPages(url);
 }
 
 export async function fetchMetaCampaignStatus() {
   const { adAccountId, pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns?fields=id,status,name&access_token=${pageToken}`;
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Meta Campaigns API error: ${response.statusText}`);
-
-  return response.json();
+  return fetchAllPages(url);
 }
 
 export async function fetchMetaAdSetStatus() {
   const { adAccountId, pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/adsets?fields=id,status,name&access_token=${pageToken}`;
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Meta AdSet API error: ${response.statusText}`);
-
-  return response.json();
+  return fetchAllPages(url);
 }
 
 export async function fetchMetaAdStatus() {
   const { adAccountId, pageToken } = getConfig();
   const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/ads?fields=id,status,name&access_token=${pageToken}`;
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Meta Ad API error: ${response.statusText}`);
-
-  return response.json();
+  return fetchAllPages(url);
 }
 
 export async function processMetaLead(leadData: any) {
