@@ -109,9 +109,9 @@ function AdminDash({ onOpen }: { onOpen: (l: Lead) => void }) {
   ];
 
   const sourceSplit = [
-    { label: 'Meta', value: leads.filter(l => l.campaignId.includes('meta')).length, color: 'var(--color-primary)' },
-    { label: 'Google', value: leads.filter(l => l.campaignId.includes('google')).length, color: 'var(--color-high)' },
-    { label: 'WhatsApp', value: leads.filter(l => l.campaignId.includes('wa')).length, color: 'var(--color-med)' },
+    { label: 'Meta', value: leads.filter(l => l.campaignId?.toLowerCase().includes('meta') || l.metaCampaignId).length, color: 'var(--color-primary)' },
+    { label: 'Google', value: leads.filter(l => l.campaignId?.toLowerCase().includes('google')).length, color: 'var(--color-high)' },
+    { label: 'WhatsApp', value: leads.filter(l => l.campaignId?.toLowerCase().includes('wa')).length, color: 'var(--color-med)' },
   ];
 
   const funnel = [
