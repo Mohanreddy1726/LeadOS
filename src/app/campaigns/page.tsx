@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Panel, PanelHead, KpiCard } from "@/components/bits";
 import { useStore } from "@/lib/store";
@@ -14,7 +14,14 @@ export default function CampaignsPage() {
   const [view, setView] = useState<"campaigns" | "adsets" | "ads">("campaigns");
   const [syncing, setSyncing] = useState(false);
 
-  const currentData = view === "campaigns" ? campaigns : view === "adsets" ? adsets : ads;
+  const currentData = useMemo(() => {
+    const data = view === "campaigns" ? campaigns : view === "adsets" ? adsets : ads;
+    return [...data].sort((a, b) => {
+      if (a.status === 'ACTIVE' && b.status !== 'ACTIVE') return -1;
+      if (a.status !== 'ACTIVE' && b.status === 'ACTIVE') return 1;
+      return 0;
+    });
+  }, [view, campaigns, adsets, ads]);
 
   const totalSpend = campaigns.reduce((s, c) => s + (c.spend || 0), 0);
   const totalLeads = leads.length;
