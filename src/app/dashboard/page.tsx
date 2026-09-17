@@ -472,8 +472,8 @@ function RecentLeads({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) => vo
         <EmptyState title="No leads yet" body="New leads appear here as campaigns deliver." />
       ) : (
         <ul className="divide-y divide-border">
-          {leads.slice(0, 8).map((l) => (
-            <li key={l.id}>
+          {leads.slice(0, 8).map((l, index) => (
+            <li key={`${l.id}-${index}`}>
               <button
                 onClick={() => onOpen(l)}
                 className="grid w-full grid-cols-[minmax(0,1.6fr)_auto] items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-foreground/[0.03] sm:grid-cols-[1.6fr_1fr_auto_auto_auto]"
