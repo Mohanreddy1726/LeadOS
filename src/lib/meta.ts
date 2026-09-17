@@ -59,10 +59,39 @@ export async function fetchMetaLeadsList() {
   try {
     const pageId = await fetchPageId();
     await logMetaSync(`Using Page ID ${pageId} for lead retrieval.`);
-    const url = `https://graph.facebook.com/v19.0/${pageId}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
-    return await fetchAllPages(url);
+
+    // Step 1: Fetch all Leadgen Forms for the page
+    const formsUrl = `https://graph.facebook.com/v19.0/${pageId}/leadgen_forms?access_token=${pageToken}&fields=id,name`;
+    const formsRes = await fetch(formsUrl);
+    if (!formsRes.ok) throw new Error(`Failed to fetch leadgen forms: ${formsRes.statusText}`);
+    const formsData = await formsRes.json();
+
+    if (!formsData.data || formsData.data.length === 0) {
+      await logMetaSync(`No leadgen forms found for Page ${pageId}.`, 'WARN');
+      return [];
+    }
+
+    await logMetaSync(`Found ${formsData.data.length} leadgen forms. Fetching leads for each...`);
+
+    // Step 2: Fetch leads for each form and combine them
+    let allLeads = [];
+    for (const form of formsData.data) {
+      const leadsUrl = `https://graph.facebook.com/v19.0/${form.id}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
+      const leadsRes = await fetch(leadsUrl);
+      if (leadsRes.ok) {
+        const leadsData = await leadsRes.json();
+        if (leadsData.data) {
+          allLeads.push(...leadsData.data);
+        }
+      } else {
+        await logMetaSync(`Failed to fetch leads for form ${form.id}: ${leadsRes.statusText}`, 'WARN');
+      }
+    }
+
+    return allLeads;
   } catch (err) {
-    await logMetaSync(`Page-level lead retrieval failed or no Page ID found, falling back to Ad Account. Error: ${err}`, 'WARN');
+    await logMetaSync(`Lead retrieval failed. Error: ${err}`, 'ERROR');
+    // Fallback to Ad Account is unlikely to work if the form-level fetch failed, but we keep it for safety
     const url = `https://graph.facebook.com/v19.0/act_${adAccountId}/leads?access_token=${pageToken}&fields=id,created_time&limit=100`;
     return await fetchAllPages(url);
   }
