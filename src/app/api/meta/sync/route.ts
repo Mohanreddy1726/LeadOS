@@ -9,7 +9,7 @@ import Ad from '@/lib/models/Ad';
 export async function GET(req: NextRequest) {
   try {
     const token = req.headers.get('Authorization');
-    if (!token) {
+    if (!token || token === 'Bearer null' || token === 'Bearer undefined') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -154,6 +154,7 @@ export async function GET(req: NextRequest) {
 
   } catch (err: any) {
     console.error('Meta Sync Error:', err);
+    await logMetaSync(`Meta Sync Critical Error: ${err.message}`, 'ERROR');
     return NextResponse.json({ message: 'Server error', error: err.message }, { status: 500 });
   }
 }
