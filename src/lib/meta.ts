@@ -9,12 +9,24 @@ interface MetaConfig {
   pageToken: string;
 }
 
-const getConfig = (): MetaConfig => ({
-  appId: process.env.META_APP_ID || '',
-  appSecret: process.env.META_APP_SECRET || '',
-  adAccountId: process.env.META_AD_ACCOUNT_ID || '',
-  pageToken: process.env.META_PAGE_ACCESS_TOKEN || '',
-});
+const getConfig = (): MetaConfig => {
+  const config = {
+    appId: process.env.META_APP_ID || '',
+    appSecret: process.env.META_APP_SECRET || '',
+    adAccountId: process.env.META_AD_ACCOUNT_ID || '',
+    pageToken: process.env.META_PAGE_ACCESS_TOKEN || '',
+  };
+
+  const missing = Object.entries(config)
+    .filter(([_, value]) => !value)
+    .map(([key]) => key);
+
+  if (missing.length > 0) {
+    throw new Error(`Missing Meta configuration environment variables: ${missing.join(', ')}`);
+  }
+
+  return config;
+};
 
 async function fetchAllPages(url: string) {
   let allData: any[] = [];
@@ -84,7 +96,7 @@ export async function fetchMetaLeadsList() {
 
     if (!formsData.data || formsData.data.length === 0) {
       await logMetaSync(`No leadgen forms found for Page ${pageId}. Please check if forms are created and the token has leads_retrieval permission.`, 'WARN');
-      return [];
+      return { leads: [], pageAccessToken };
     }
 
     await logMetaSync(`Found ${formsData.data.length} leadgen forms. Fetching leads for each...`);
@@ -107,16 +119,15 @@ export async function fetchMetaLeadsList() {
       }
     }
 
-    return allLeads;
+    return { leads: allLeads, pageAccessToken };
   } catch (err) {
     await logMetaSync(`Lead retrieval failed critical error: ${err}`, 'ERROR');
     throw err;
   }
 }
 
-export async function fetchMetaLeadData(leadgenId: string) {
-  const { pageToken } = getConfig();
-  const url = `https://graph.facebook.com/v19.0/${leadgenId}?access_token=${pageToken}&fields=field_data,campaign_id,adset_id,ad_id`;
+export async function fetchMetaLeadData(leadgenId: string, accessToken: string) {
+  const url = `https://graph.facebook.com/v19.0/${leadgenId}?access_token=${accessToken}&fields=field_data,campaign_id,adset_id,ad_id`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Meta API error: ${response.statusText}`);
@@ -168,13 +179,13 @@ export async function fetchMetaAdStatus() {
 
 export async function syncMetaLeads() {
   try {
-    const leadsList = await fetchMetaLeadsList();
+    const { leads: leadsList, pageAccessToken } = await fetchMetaLeadsList();
     await logMetaSync(`Found ${leadsList.length} leads to sync from Meta...`);
 
     let processedCount = 0;
     for (const lead of leadsList) {
       try {
-        const leadData = await fetchMetaLeadData(lead.id);
+        const leadData = await fetchMetaLeadData(lead.id, pageAccessToken);
         await processMetaLead(leadData);
         processedCount++;
       } catch (err) {

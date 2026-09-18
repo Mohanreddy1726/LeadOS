@@ -52,7 +52,8 @@ export default function CampaignsPage() {
 
         alert("All Meta assets synced successfully!");
       } else {
-        alert("Failed to sync campaigns.");
+        const errorData = await res.json().catch(() => ({}));
+        alert(`Failed to sync campaigns: ${errorData.error || "Unknown error"}`);
       }
     } catch (err) {
       console.error("Sync error:", err);
