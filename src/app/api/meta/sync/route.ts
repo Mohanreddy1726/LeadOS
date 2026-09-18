@@ -84,15 +84,20 @@ export async function GET(req: NextRequest) {
     await Promise.all(adSetStatData.map(async (item: any) => {
       seenAdSetIds.add(item.id);
       const perf = adSetPerfMap.get(item.id) || {};
-      const campaignStatus = (campaignStatusMap.get(item.campaign_id) || 'UNKNOWN').toUpperCase();
+
+      // Use string conversion to ensure ID match
+      const campId = String(item.campaign_id);
+      const campaignStatus = (campaignStatusMap.get(campId) || campaignStatusMap.get(Number(campId)) || 'UNKNOWN').toUpperCase();
       const adSetStatus = (item.status || 'UNKNOWN').toUpperCase();
+
       const conversions = perf.conversions ||
                            (perf.actions && perf.actions.find((a: any) => a.action_type === 'lead')?.value) ||
                            0;
 
       let effectiveStatus = adSetStatus;
       if (adSetStatus === 'ACTIVE') {
-        if (campaignStatus !== 'ACTIVE') {
+        // Only force INACTIVE if we have a definitive status that is NOT active
+        if (campaignStatus !== 'ACTIVE' && campaignStatus !== 'UNKNOWN') {
           effectiveStatus = 'INACTIVE';
         }
       }
@@ -119,16 +124,25 @@ export async function GET(req: NextRequest) {
     await Promise.all(adStatData.map(async (item: any) => {
       seenAdIds.add(item.id);
       const perf = adPerfMap.get(item.id) || {};
-      const campaignStatus = (campaignStatusMap.get(item.campaign_id) || 'UNKNOWN').toUpperCase();
-      const adSetStatus = (adSetStatusMap.get(item.adset_id) || 'UNKNOWN').toUpperCase();
+
+      const campId = String(item.campaign_id);
+      const asId = String(item.adset_id);
+
+      const campaignStatus = (campaignStatusMap.get(campId) || campaignStatusMap.get(Number(campId)) || 'UNKNOWN').toUpperCase();
+      const adSetStatus = (adSetStatusMap.get(asId) || adSetStatusMap.get(Number(asId)) || 'UNKNOWN').toUpperCase();
       const adStatus = (item.status || 'UNKNOWN').toUpperCase();
+
       const conversions = perf.conversions ||
                            (perf.actions && perf.actions.find((a: any) => a.action_type === 'lead')?.value) ||
                            0;
 
       let effectiveStatus = adStatus;
       if (adStatus === 'ACTIVE') {
-        if (campaignStatus !== 'ACTIVE' || adSetStatus !== 'ACTIVE') {
+        // Only force INACTIVE if we have definitive non-active statuses for parents
+        const isCampInactive = campaignStatus !== 'ACTIVE' && campaignStatus !== 'UNKNOWN';
+        const isAsInactive = adSetStatus !== 'ACTIVE' && adSetStatus !== 'UNKNOWN';
+
+        if (isCampInactive || isAsInactive) {
           effectiveStatus = 'INACTIVE';
         }
       }
