@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     }
 
     const campaigns = await Campaign.find();
+    console.log(`API Campaigns GET: Found ${campaigns.length} campaigns`);
     return NextResponse.json(campaigns);
   } catch (err: any) {
     return NextResponse.json({ message: 'Server error', error: err.message }, { status: 500 });
