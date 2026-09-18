@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
 
       // Fetch actual lead data from Meta Graph API
       try {
-        const leadData = await fetchMetaLeadData(change.leadgen_id);
+        const pageToken = process.env.META_PAGE_ACCESS_TOKEN || '';
+        const leadData = await fetchMetaLeadData(change.leadgen_id, pageToken);
         await processMetaLead(leadData);
         console.log('Meta lead processed successfully:', change.leadgen_id);
       } catch (err) {
