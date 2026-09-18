@@ -91,9 +91,10 @@ export async function GET(req: NextRequest) {
                            0;
 
       let effectiveStatus = adSetStatus;
-      // Only force INACTIVE if parent is explicitly not ACTIVE and not UNKNOWN
-      if (adSetStatus === 'ACTIVE' && campaignStatus !== 'ACTIVE' && campaignStatus !== 'UNKNOWN') {
-        effectiveStatus = 'INACTIVE';
+      if (adSetStatus === 'ACTIVE') {
+        if (campaignStatus !== 'ACTIVE') {
+          effectiveStatus = 'INACTIVE';
+        }
       }
 
       return AdSet.findOneAndUpdate(
@@ -126,11 +127,10 @@ export async function GET(req: NextRequest) {
                            0;
 
       let effectiveStatus = adStatus;
-      // Only force INACTIVE if any parent is explicitly not ACTIVE and not UNKNOWN
-      if (adStatus === 'ACTIVE' &&
-          ((campaignStatus !== 'ACTIVE' && campaignStatus !== 'UNKNOWN') ||
-           (adSetStatus !== 'ACTIVE' && adSetStatus !== 'UNKNOWN'))) {
-        effectiveStatus = 'INACTIVE';
+      if (adStatus === 'ACTIVE') {
+        if (campaignStatus !== 'ACTIVE' || adSetStatus !== 'ACTIVE') {
+          effectiveStatus = 'INACTIVE';
+        }
       }
 
       return Ad.findOneAndUpdate(
