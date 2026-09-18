@@ -30,6 +30,16 @@ export async function GET(req: NextRequest) {
       fetchMetaAdStatus(),
     ]);
 
+    // Create maps for quick lookup of performance data
+    const campaignPerfMap = new Map();
+    campaignsData.forEach((item: any) => campaignPerfMap.set(item.campaign_id, item));
+
+    const adSetPerfMap = new Map();
+    adSetsData.forEach((item: any) => adSetPerfMap.set(item.adset_id, item));
+
+    const adPerfMap = new Map();
+    adsData.forEach((item: any) => adPerfMap.set(item.ad_id, item));
+
     const campaignStatusMap = new Map();
     campaignStatData.forEach((s: any) => campaignStatusMap.set(s.id, s.status));
 
@@ -39,89 +49,90 @@ export async function GET(req: NextRequest) {
     const adStatusMap = new Map();
     adStatData.forEach((s: any) => adStatusMap.set(s.id, s.status));
 
-    // Sync Campaigns
+    // Sync Campaigns - Iterate over ALL campaigns
     const seenCampaignIds = new Set();
-    await Promise.all(campaignsData.map(async (item: any) => {
-      seenCampaignIds.add(item.campaign_id);
-      const status = campaignStatusMap.get(item.campaign_id) || 'INACTIVE';
-      const conversions = item.conversions ||
-                           (item.actions && item.actions.find((a: any) => a.action_type === 'lead')?.value) ||
+    await Promise.all(campaignStatData.map(async (item: any) => {
+      seenCampaignIds.add(item.id);
+      const perf = campaignPerfMap.get(item.id) || {};
+      const status = campaignStatusMap.get(item.id) || 'INACTIVE';
+      const conversions = perf.conversions ||
+                           (perf.actions && perf.actions.find((a: any) => a.action_type === 'lead')?.value) ||
                            0;
       return Campaign.findOneAndUpdate(
-        { metaCampaignId: item.campaign_id, platform: 'Meta' },
+        { metaCampaignId: item.id, platform: 'Meta' },
         {
-          metaCampaignId: item.campaign_id,
-          name: item.campaign_name,
+          metaCampaignId: item.id,
+          name: item.name,
           status: status,
-          spend: parseFloat(item.spend || '0'),
-          impressions: parseInt(item.impressions || '0', 10),
-          clicks: parseInt(item.clicks || '0', 10),
+          spend: parseFloat(perf.spend || '0'),
+          impressions: parseInt(perf.impressions || '0', 10),
+          clicks: parseInt(perf.clicks || '0', 10),
           conversions: parseInt(conversions || '0', 10),
-          reach: parseInt(item.reach || '0', 10),
+          reach: parseInt(perf.reach || '0', 10),
         },
         { upsert: true, new: true }
       );
     }));
 
-    // Sync AdSets
+    // Sync AdSets - Iterate over ALL adsets
     const seenAdSetIds = new Set();
-    await Promise.all(adSetsData.map(async (item: any) => {
-      seenAdSetIds.add(item.adset_id);
+    await Promise.all(adSetStatData.map(async (item: any) => {
+      seenAdSetIds.add(item.id);
+      const perf = adSetPerfMap.get(item.id) || {};
       const campaignStatus = campaignStatusMap.get(item.campaign_id) || 'INACTIVE';
-      const adSetStatus = adSetStatusMap.get(item.adset_id) || 'INACTIVE';
-      const conversions = item.conversions ||
-                           (item.actions && item.actions.find((a: any) => a.action_type === 'lead')?.value) ||
+      const adSetStatus = adSetStatusMap.get(item.id) || 'INACTIVE';
+      const conversions = perf.conversions ||
+                           (perf.actions && perf.actions.find((a: any) => a.action_type === 'lead')?.value) ||
                            0;
-      // Effective status: Active only if both AdSet and Campaign are Active
       const effectiveStatus = (campaignStatus === 'ACTIVE' && adSetStatus === 'ACTIVE')
         ? 'ACTIVE'
         : (adSetStatus === 'ACTIVE' ? 'INACTIVE' : adSetStatus);
 
       return AdSet.findOneAndUpdate(
-        { metaAdSetId: item.adset_id, platform: 'Meta' },
+        { metaAdSetId: item.id, platform: 'Meta' },
         {
-          metaAdSetId: item.adset_id,
-          name: item.adset_name,
+          metaAdSetId: item.id,
+          name: item.name,
           campaignId: item.campaign_id,
           status: effectiveStatus === 'Unknown' ? 'INACTIVE' : effectiveStatus,
-          spend: parseFloat(item.spend || '0'),
-          impressions: parseInt(item.impressions || '0', 10),
-          clicks: parseInt(item.clicks || '0', 10),
+          spend: parseFloat(perf.spend || '0'),
+          impressions: parseInt(perf.impressions || '0', 10),
+          clicks: parseInt(perf.clicks || '0', 10),
           conversions: parseInt(conversions || '0', 10),
-          reach: parseInt(item.reach || '0', 10),
+          reach: parseInt(perf.reach || '0', 10),
         },
         { upsert: true, new: true }
       );
     }));
 
-    // Sync Ads
+    // Sync Ads - Iterate over ALL ads
     const seenAdIds = new Set();
-    await Promise.all(adsData.map(async (item: any) => {
-      seenAdIds.add(item.ad_id);
+    await Promise.all(adStatData.map(async (item: any) => {
+      seenAdIds.add(item.id);
+      const perf = adPerfMap.get(item.id) || {};
       const campaignStatus = campaignStatusMap.get(item.campaign_id) || 'INACTIVE';
       const adSetStatus = adSetStatusMap.get(item.adset_id) || 'INACTIVE';
-      const adStatus = adStatusMap.get(item.ad_id) || 'INACTIVE';
-      const conversions = item.conversions ||
-                           (item.actions && item.actions.find((a: any) => a.action_type === 'lead')?.value) ||
+      const adStatus = adStatusMap.get(item.id) || 'INACTIVE';
+      const conversions = perf.conversions ||
+                           (perf.actions && perf.actions.find((a: any) => a.action_type === 'lead')?.value) ||
                            0;
-      // Effective status: Active only if Campaign, AdSet, and Ad are all Active
       const effectiveStatus = (campaignStatus === 'ACTIVE' && adSetStatus === 'ACTIVE' && adStatus === 'ACTIVE')
         ? 'ACTIVE'
         : (adStatus === 'ACTIVE' ? 'INACTIVE' : adStatus);
 
       return Ad.findOneAndUpdate(
-        { metaAdId: item.ad_id, platform: 'Meta' },
+        { metaAdId: item.id, platform: 'Meta' },
         {
-          metaAdId: item.ad_id,
-          name: item.ad_name,
+          metaAdId: item.id,
+          name: item.name,
           adSetId: item.adset_id,
           campaignId: item.campaign_id,
           status: effectiveStatus === 'Unknown' ? 'INACTIVE' : effectiveStatus,
-          spend: parseFloat(item.spend || '0'),
-          impressions: parseInt(item.impressions || '0', 10),
-          clicks: parseInt(item.clicks || '0', 10),
+          spend: parseFloat(perf.spend || '0'),
+          impressions: parseInt(perf.impressions || '0', 10),
+          clicks: parseInt(perf.clicks || '0', 10),
           conversions: parseInt(conversions || '0', 10),
-          reach: parseInt(item.reach || '0', 10),
+          reach: parseInt(perf.reach || '0', 10),
         },
         { upsert: true, new: true }
       );
